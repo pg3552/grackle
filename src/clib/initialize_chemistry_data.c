@@ -44,6 +44,10 @@ int initialize_cloudy_data(chemistry_data *my_chemistry,
 int initialize_UVbackground_data(chemistry_data *my_chemistry,
                                  chemistry_data_storage *my_rates);
 
+#ifdef DUST_EVOL
+int initialize_dust_data(chemistry_data *my_chemistry);
+#endif
+
 extern void FORTRAN_NAME(calc_rates_g)(
      int *ispecies,
      int *nratec, double *aye, double *temstart, double *temend, 
@@ -328,6 +332,14 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
     return FAIL;
   }
 
+#ifdef DUST_EVOL
+  /* Initialize dust evolution data */
+  if (initialize_dust_data(my_chemistry) == FAIL) {
+    fprintf(stderr, "Error in initialize_dust_data.\n");
+    return FAIL;
+  }
+#endif
+
   return SUCCESS;
 }
 
@@ -427,6 +439,30 @@ void show_parameters(FILE *fp, chemistry_data *my_chemistry)
           my_chemistry->self_shielding_method);
   fprintf(fp, "H2_self_shielding                 = %d\n",
           my_chemistry->H2_self_shielding);
+  fprintf(fp, "use_dust_evol                     = %d\n",
+		  my_chemistry->use_dust_evol);
+  fprintf(fp, "SolarAbundances[0]                = %g\n",
+		  my_chemistry->SolarAbundances[0]);
+  fprintf(fp, "SolarAbundances[1]                = %g\n",
+		  my_chemistry->SolarAbundances[1]);
+  fprintf(fp, "SolarAbundances[2]                = %g\n",
+		  my_chemistry->SolarAbundances[2]);
+  fprintf(fp, "SolarAbundances[3]                = %g\n",
+		  my_chemistry->SolarAbundances[3]);
+  fprintf(fp, "SolarAbundances[4]                = %g\n",
+		  my_chemistry->SolarAbundances[4]);
+  fprintf(fp, "SolarAbundances[5]                = %g\n",
+		  my_chemistry->SolarAbundances[5]);
+  fprintf(fp, "SolarAbundances[6]                = %g\n",
+		  my_chemistry->SolarAbundances[6]);
+  fprintf(fp, "SolarAbundances[7]                = %g\n",
+		  my_chemistry->SolarAbundances[7]);
+  fprintf(fp, "SolarAbundances[8]                = %g\n",
+		  my_chemistry->SolarAbundances[8]);
+  fprintf(fp, "SolarAbundances[9]                = %g\n",
+		  my_chemistry->SolarAbundances[9]);
+  fprintf(fp, "SolarAbundances[10]               = %g\n",
+		  my_chemistry->SolarAbundances[10]);
 # ifdef _OPENMP
   fprintf(fp, "omp_nthreads                      = %d\n",
           my_chemistry->omp_nthreads);

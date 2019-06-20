@@ -41,7 +41,9 @@
      &                metGridRank, metGridDim,
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
-     &                iVheat, iMheat, Vheat, Mheat)
+     &                iVheat, iMheat, Vheat, Mheat,
+     &                iDustEvol, SolarAbd, umass, mt, md, 
+     &                met, dmet, sne)
 
 !
 !  SOLVE MULTI-SPECIES RATE EQUATIONS AND RADIATIVE COOLING
@@ -130,6 +132,15 @@
 !    Vheat       - array of volumetric heating rates
 !    Mheat       - array of specific heating rates
 !
+!    iDustEvol   - flag for using dust growth and destruction
+!    SolarAbd    - solar element abundances
+!    umass       - mass units 
+!    mt          - array of TOTAL mass (gas + dust)
+!    md          - array of dust mass
+!    met         - array GAS metallicity array
+!    dmet        - array of dust metallicity array
+!    sne         - array of number of super novaes within dt
+!
 !  OUTPUTS:
 !    update chemical rate densities (HI, HII, etc)
 !
@@ -152,11 +163,11 @@
      &        ierr, imcool, idust, 
      &        igammah, ih2optical, iciecool, ithreebody,
      &        ndratec, clnew, iVheat, iMheat, iH2shield, iradshield,
-     &        iradtrans, iradcoupled, iradstep, irt_honly
+     &        iradtrans, iradcoupled, iradstep, irt_honly, iDustEvol
 
       real*8  dx, dt, aye, temstart, temend, gamma,
      &        utim, uxyz, uaye, urho, utem, fh, dtoh, z_solar, 
-     &        dtemstart, dtemend, clEleFra
+     &        dtemstart, dtemend, clEleFra, SolarAbd, umass
 
 !  Density, energy and velocity fields fields
 
@@ -176,6 +187,10 @@
 ! H2 self-shielding length-scale field
 
       R_PREC  xH2shield(in,jn,kn)
+
+! Dust growth and destruction fields
+      R_PREC  mt(in,jn,kn), md(in,jn,kn), met(in,jn,kn,11),
+     &        dmet(in,jn,kn,11), sne(in,jn,kn)
 
 !  Cooling tables (coolings rates as a function of temperature)
 
@@ -277,6 +292,8 @@
      &       k13dd(in, 14), h2dust(in),
      &       ncrn(in), ncrd1(in), ncrd2(in)
 
+!  Dust growth and destruction timescales
+      real*8 tau_accr(in), tau_dest(in), tau_sput(in)
 !  Cooling/heating row locals
 
       real*8 ceHI(in), ceHeI(in), ceHeII(in),
@@ -464,6 +481,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
+     &                iDustEvol,umass, mt, md,
      &                itmask)
 
             if (ispecies .gt. 0) then
@@ -547,11 +565,24 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
                endif
 
 !              compute minimum rate timestep
+               if (iDustEvol .eq. 1) then
+                   call dust_tau_for_timestep(in, jn, kn, i, j, k, ! CHECK: a bit memory inefficient if it passes copies instead of addresses of arrays
+     &                              d, tgas, mt, md, met, sne,
+     &                              tau_accr, tau_dest, tau_sput,
+     &                              SolarAbd, utim, umass, dt)
+               else
+                   tau_accr(i) = huge8
+                   tau_dest(i) = huge8
+                   tau_sput(i) = huge8
+               endif
 
                olddtit = dtit(i)
-               dtit(i) = min(abs(0.1_DKIND*de(i,j,k)/dedot(i)), 
+               dtit(i) = min(abs(0.1_DKIND*de(i,j,k)/dedot(i)), ! QUESTION: why and how to compress 3d to 1d again? My cofusion might caused by fortran's col-major array?
      &              abs(0.1_DKIND*HI(i,j,k)/HIdot(i)),
-     &              dt-ttot(i), 0.5_DKIND*dt)
+     &              dt-ttot(i), 0.5_DKIND*dt,
+     &              0.1_DKIND*tau_accr(i), 
+     &              0.1_DKIND*tau_dest(i), 
+     &              0.1_DKIND*tau_sput(i))
 
                if (d(i,j,k)*dom .gt. 1e8_DKIND .and. 
      &              edot(i) .gt. 0._DKIND) then
@@ -758,6 +789,20 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &                     itmask)
 
             endif
+
+!           Dust growth and destruction 
+            
+            if (iDustEvol .eq. 1) then
+            do i = is+1, ie+1
+                if (itmask(i)) then
+                   call dust_growth_and_destruction(in,jn,kn,i,j,k, ! CHECK: a bit memory inefficient if it passes copies instead of addresses of arrays
+     &                              d, tgas, mt, md, met, dmet, sne,
+     &                              tau_dest, tau_sput,
+     &                              SolarAbd, utim, umass, dt)
+                endif
+            enddo
+            endif
+
 
 !           Add the timestep to the elapsed time for each cell and find
 !            minimum elapsed time step in this row

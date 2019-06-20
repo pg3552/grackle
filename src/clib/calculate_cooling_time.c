@@ -68,7 +68,9 @@ extern void FORTRAN_NAME(cool_multi_time_g)(
         double *metPar4, double *metPar5,
  	long long *metDataSize, double *metCooling,
         double *metHeating, int *clnew,
-        int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat);
+        int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat,
+		int *iDustEvol, double *umass,
+		gr_float *mt, gr_float *md);
 
 int _calculate_cooling_time(chemistry_data *my_chemistry,
                             chemistry_data_storage *my_rates,
@@ -83,7 +85,8 @@ int _calculate_cooling_time(chemistry_data *my_chemistry,
                             gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density,
                             gr_float *e_density, gr_float *metal_density,
                             gr_float *cooling_time, gr_float *RT_heating_rate,
-                            gr_float *volumetric_heating_rate, gr_float *specific_heating_rate)
+                            gr_float *volumetric_heating_rate, gr_float *specific_heating_rate,
+							gr_float *Mass, gr_float *dust_Mass)
 {
  
   /* Return if this doesn't concern us. */
@@ -216,7 +219,10 @@ int _calculate_cooling_time(chemistry_data *my_chemistry,
        &my_rates->cloudy_data_new,
        &my_chemistry->use_volumetric_heating_rate,
        &my_chemistry->use_specific_heating_rate,
-       volumetric_heating_rate, specific_heating_rate);
+       volumetric_heating_rate, specific_heating_rate,
+	   &my_chemistry->use_dust_evol,
+	   &my_units->mass_units,
+	   Mass, dust_Mass);
  
   return SUCCESS;
 }
@@ -244,7 +250,8 @@ int local_calculate_cooling_time(chemistry_data *my_chemistry,
                               my_fields->e_density, my_fields->metal_density,
                               cooling_time, my_fields->RT_heating_rate,
                               my_fields->volumetric_heating_rate,
-                              my_fields->specific_heating_rate) == FAIL) {
+                              my_fields->specific_heating_rate,
+							  my_fields->Mass, my_fields->dust_Mass) == FAIL) {
     fprintf(stderr, "Error in _calculate_cooling_time.\n");
     return FAIL;
   }

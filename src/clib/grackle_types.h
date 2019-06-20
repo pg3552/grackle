@@ -50,7 +50,7 @@ typedef struct
   gr_float *DII_density;
   gr_float *HDI_density;
   gr_float *e_density;
-  gr_float *metal_density;
+  gr_float *metal_density; //CHECK
 
   gr_float *internal_energy;
   gr_float *x_velocity;
@@ -67,6 +67,15 @@ typedef struct
   gr_float *RT_H2_dissociation_rate;
 
   gr_float *H2_self_shielding_length;
+  
+#ifdef DUST_EVOL
+  gr_float *Mass; // gas + dust mass
+  gr_float *dust_Mass;
+  gr_float (*Metallicity)[11];
+  gr_float (*dust_Metallicity)[11];
+  gr_float *SNe_ThisTimeStep;
+  //gr_float *Temperature; //CHECK grackle internal_enrgy -> temperature handler
+#endif
 
 } grackle_field_data;
 
@@ -80,6 +89,10 @@ typedef struct
   double velocity_units;
   double a_units;
   double a_value;
+
+#ifdef DUST_EVOL
+  double mass_units;
+#endif
 
 } code_units;
 

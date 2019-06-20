@@ -79,7 +79,10 @@ extern void FORTRAN_NAME(solve_rate_cool_g)(
         double *metPar4, double *metPar5,
  	long long *metDataSize, double *metCooling,
         double *metHeating, int *clnew,
-        int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat);
+        int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat,
+		int *iDustEvol, double *SolarAbd,double *umass,
+		gr_float *mt, gr_float *md, gr_float (*met)[11],
+		gr_float (*dmet)[11], gr_float *sne);
 
 int _solve_chemistry(chemistry_data *my_chemistry,
                      chemistry_data_storage *my_rates,
@@ -96,7 +99,9 @@ int _solve_chemistry(chemistry_data *my_chemistry,
                      gr_float *volumetric_heating_rate, gr_float *specific_heating_rate,
                      gr_float *RT_heating_rate, gr_float *RT_HI_ionization_rate, gr_float *RT_HeI_ionization_rate,
                      gr_float *RT_HeII_ionization_rate, gr_float *RT_H2_dissociation_rate,
-                     gr_float *H2_self_shielding_length)
+                     gr_float *H2_self_shielding_length,
+					 gr_float *Mass, gr_float *dust_Mass, gr_float (*Metallicity)[11], 
+					 gr_float (*dust_Metallicity)[11], gr_float *SNe_ThisTimeStep)
 {
 
   /* Return if this doesn't concern us. */
@@ -256,7 +261,12 @@ int _solve_chemistry(chemistry_data *my_chemistry,
     &my_rates->cloudy_data_new,
     &my_chemistry->use_volumetric_heating_rate,
     &my_chemistry->use_specific_heating_rate,
-    volumetric_heating_rate, specific_heating_rate);
+    volumetric_heating_rate, specific_heating_rate,
+	&my_chemistry->use_dust_evol,
+	&my_chemistry->SolarAbundances,
+	&my_units->mass_units,
+	Mass, dust_Mass, Metallicity, 
+	dust_Metallicity, SNe_ThisTimeStep);
 
   return SUCCESS;
 
@@ -288,7 +298,10 @@ int local_solve_chemistry(chemistry_data *my_chemistry,
                        my_fields->RT_heating_rate, my_fields->RT_HI_ionization_rate,
                        my_fields->RT_HeI_ionization_rate, my_fields->RT_HeII_ionization_rate,
                        my_fields->RT_H2_dissociation_rate,
-                       my_fields->H2_self_shielding_length) == FAIL) {
+                       my_fields->H2_self_shielding_length,
+					   my_fields->Mass, my_fields->dust_Mass, my_fields->Metallicity, 
+					   my_fields->dust_Metallicity, my_fields->SNe_ThisTimeStep) == FAIL) {
+
     fprintf(stderr, "Error in _solve_chemistry.\n");
     return FAIL;
   }

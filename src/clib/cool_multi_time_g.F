@@ -29,7 +29,8 @@
      &                metGridRank, metGridDim,
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
-     &                iVheat, iMheat, Vheat, Mheat)
+     &                iVheat, iMheat, Vheat, Mheat,
+     &                iDustEvol, umass, mt, md)
 
 !  SOLVE RADIATIVE COOLING/HEATING EQUATIONS
 !
@@ -60,11 +61,11 @@
       integer in, jn, kn, is, js, ks, ie, je, ke, nratec, 
      &        iexpand, ih2co, ipiht, ispecies, imetal, idim,
      &        imcool, idust, igammah, ih2optical, iciecool,
-     &        clnew, iVheat, iMheat, iradtrans, iradshield
+     &        clnew, iVheat, iMheat, iradtrans, iradshield, iDustEvol
 
       real*8  aye, temstart, temend,
      &        utem, uxyz, uaye, urho, utim,
-     &        gamma, fh, z_solar, clEleFra
+     &        gamma, fh, z_solar, clEleFra, umass
       R_PREC  d(in,jn,kn),   e(in,jn,kn),
      &        u(in,jn,kn),   v(in,jn,kn),    w(in,jn,kn),
      &        de(in,jn,kn),  HI(in,jn,kn),   HII(in,jn,kn),
@@ -86,7 +87,10 @@
      &        reHeII2a(nratec), reHeIIIa(nratec), brema(nratec),
      &        compa, piHI, piHeI, piHeII, comp_xraya, comp_temp,
      &        gammaha, avgsighi, avgsighei, avgsigheii,
-     &        k24, k26
+
+!  Dust growth and destruction fields
+      R_PREC  mt(in,jn,kn), md(in,jn,kn)
+
 !  Cloudy cooling data
 
       integer icmbTfloor, iClHeat
@@ -269,6 +273,7 @@
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
+     &                iDustEvol, umass, mt, md,
      &                itmask)
 
 !        Compute the cooling time on the slice
