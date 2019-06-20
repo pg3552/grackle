@@ -87,6 +87,7 @@
      &        reHeII2a(nratec), reHeIIIa(nratec), brema(nratec),
      &        compa, piHI, piHeI, piHeII, comp_xraya, comp_temp,
      &        gammaha, avgsighi, avgsighei, avgsigheii,
+     &        k24, k26
 
 !  Dust growth and destruction fields
       R_PREC  mt(in,jn,kn), md(in,jn,kn)

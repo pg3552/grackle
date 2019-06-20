@@ -68,14 +68,12 @@ typedef struct
 
   gr_float *H2_self_shielding_length;
   
-#ifdef DUST_EVOL
   gr_float *Mass; // gas + dust mass
   gr_float *dust_Mass;
   gr_float (*Metallicity)[11];
   gr_float (*dust_Metallicity)[11];
   gr_float *SNe_ThisTimeStep;
   //gr_float *Temperature; //CHECK grackle internal_enrgy -> temperature handler
-#endif
 
 } grackle_field_data;
 
@@ -90,9 +88,7 @@ typedef struct
   double a_units;
   double a_value;
 
-#ifdef DUST_EVOL
   double mass_units;
-#endif
 
 } code_units;
 
