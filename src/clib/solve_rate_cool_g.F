@@ -189,8 +189,8 @@
       R_PREC  xH2shield(in,jn,kn)
 
 ! Dust growth and destruction fields
-      R_PREC  mt(in,jn,kn), md(in,jn,kn), met(in,jn,kn,11),
-     &        dmet(in,jn,kn,11), sne(in,jn,kn)
+      R_PREC  mt(in,jn,kn), md(in,jn,kn), met(11,in,jn,kn),
+     &        dmet(11,in,jn,kn), sne(in,jn,kn)
 
 !  Cooling tables (coolings rates as a function of temperature)
 
@@ -566,7 +566,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 
 !              compute minimum rate timestep
                if (iDustEvol .eq. 1) then
-                   call dust_tau_for_timestep(in, jn, kn, i, j, k, ! CHECK: a bit memory inefficient if it passes copies instead of addresses of arrays
+                   call dust_tau_for_timestep(in, jn, kn, i, j, k,
      &                              d, tgas, mt, md, met, sne,
      &                              tau_accr, tau_dest, tau_sput,
      &                              SolarAbd, utim, umass, dt)
@@ -577,7 +577,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
                endif
 
                olddtit = dtit(i)
-               dtit(i) = min(abs(0.1_DKIND*de(i,j,k)/dedot(i)), ! QUESTION: why and how to compress 3d to 1d again? My cofusion might caused by fortran's col-major array?
+               dtit(i) = min(abs(0.1_DKIND*de(i,j,k)/dedot(i)),
      &              abs(0.1_DKIND*HI(i,j,k)/HIdot(i)),
      &              dt-ttot(i), 0.5_DKIND*dt,
      &              0.1_DKIND*tau_accr(i), 

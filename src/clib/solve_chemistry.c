@@ -81,8 +81,8 @@ extern void FORTRAN_NAME(solve_rate_cool_g)(
         double *metHeating, int *clnew,
         int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat,
 		int *iDustEvol, double *SolarAbd,double *umass,
-		gr_float *mt, gr_float *md, gr_float (*met)[11],
-		gr_float (*dmet)[11], gr_float *sne);
+		gr_float *mt, gr_float *md, gr_float *met,
+		gr_float *dmet, gr_float *sne);
 
 int _solve_chemistry(chemistry_data *my_chemistry,
                      chemistry_data_storage *my_rates,
