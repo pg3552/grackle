@@ -69,6 +69,12 @@ cdef class chemistry_data:
         def __set__(self, val):
             self.data.h2_on_dust = val
 
+    property use_dust_density_field:
+        def __get__(self):
+            return self.data.use_dust_density_field
+        def __set__(self, val):
+            self.data.use_dust_density_field = val
+
     property cmb_temperature_floor:
         def __get__(self):
             return self.data.cmb_temperature_floor
@@ -124,6 +130,12 @@ cdef class chemistry_data:
             return self.data.SolarMetalFractionByMass
         def __set__(self, val):
             self.data.SolarMetalFractionByMass = val
+
+    property local_dust_to_gas_ratio:
+        def __get__(self):
+            return self.data.local_dust_to_gas_ratio
+        def __set__(self, val):
+            self.data.local_dust_to_gas_ratio = val
 
     property use_volumetric_heating_rate:
         def __get__(self):
@@ -297,6 +309,7 @@ def solve_chemistry(fc, my_dt):
     cdef gr_float *HDI_density = get_field(fc, "HDI")
     cdef gr_float *e_density = get_field(fc, "de")
     cdef gr_float *metal_density = get_field(fc, "metal")
+    cdef gr_float *dust_density = get_field(fc, "dust")
     cdef gr_float *volumetric_heating_rate = get_field(fc, "volumetric_heating_rate")
     cdef gr_float *specific_heating_rate = get_field(fc, "specific_heating_rate")
     cdef gr_float *RT_heating_rate = get_field(fc, "RT_heating_rate")
@@ -334,6 +347,7 @@ def solve_chemistry(fc, my_dt):
                 HDI_density,
                 e_density,
                 metal_density,
+                dust_density,
                 volumetric_heating_rate,
                 specific_heating_rate,
                 RT_heating_rate,
@@ -379,6 +393,7 @@ def calculate_cooling_time(fc):
     cdef gr_float *HDI_density = get_field(fc, "HDI")
     cdef gr_float *e_density = get_field(fc, "de")
     cdef gr_float *metal_density = get_field(fc, "metal")
+    cdef gr_float *dust_density = get_field(fc, "dust")
     cdef gr_float *cooling_time = get_field(fc, "cooling_time")
     cdef gr_float *RT_heating_rate = get_field(fc, "RT_heating_rate")
     cdef gr_float *volumetric_heating_rate = get_field(fc, "volumetric_heating_rate")
@@ -410,6 +425,7 @@ def calculate_cooling_time(fc):
                 HDI_density,
                 e_density,
                 metal_density,
+                dust_density,
                 cooling_time,
                 RT_heating_rate,
                 volumetric_heating_rate,
@@ -591,3 +607,62 @@ def calculate_temperature(fc):
                 e_density,
                 metal_density,
                 temperature)
+
+def calculate_dust_temperature(fc):
+    cdef int grid_rank = 1
+    cdef int grid_dimension
+    grid_dimension = fc["density"].shape[0]
+    cdef np.ndarray ref_gs, ref_ge
+    ref_gs = np.zeros(3, dtype="int64")
+    ref_ge = np.zeros(3, dtype="int64")
+    ref_ge[0] = grid_dimension -1
+    cdef int *grid_start
+    cdef int *grid_end
+    grid_start = <int *> ref_gs.data
+    grid_end = <int *> ref_ge.data
+
+    cdef chemistry_data chem_data = fc.chemistry_data
+    cdef c_chemistry_data my_chemistry = chem_data.data
+    cdef c_chemistry_data_storage my_rates = chem_data.rates
+    cdef c_code_units my_units = chem_data.units
+    cdef gr_float *density = get_field(fc, "density")
+    cdef gr_float *internal_energy = get_field(fc, "energy")
+    cdef gr_float *HI_density = get_field(fc, "HI")
+    cdef gr_float *HII_density = get_field(fc, "HII")
+    cdef gr_float *HM_density = get_field(fc, "HM")
+    cdef gr_float *HeI_density = get_field(fc, "HeI")
+    cdef gr_float *HeII_density = get_field(fc, "HeII")
+    cdef gr_float *HeIII_density = get_field(fc, "HeIII")
+    cdef gr_float *H2I_density = get_field(fc, "H2I")
+    cdef gr_float *H2II_density = get_field(fc, "H2II")
+    cdef gr_float *DI_density = get_field(fc, "DI")
+    cdef gr_float *DII_density = get_field(fc, "DII")
+    cdef gr_float *HDI_density = get_field(fc, "HDI")
+    cdef gr_float *e_density = get_field(fc, "de")
+    cdef gr_float *metal_density = get_field(fc, "metal")
+    cdef gr_float *dust_temperature = get_field(fc, "dust_temperature")
+
+    c_calculate_dust_temperature(
+                &my_chemistry,
+                &my_rates,
+                &my_units,
+                grid_rank,
+                &grid_dimension,
+                grid_start,
+                grid_end,
+                density,
+                internal_energy,
+                HI_density,
+                HII_density,
+                HM_density,
+                HeI_density,
+                HeII_density,
+                HeIII_density,
+                H2I_density,
+                H2II_density,
+                DI_density,
+                DII_density,
+                HDI_density,
+                e_density,
+                metal_density,
+                dust_temperature)

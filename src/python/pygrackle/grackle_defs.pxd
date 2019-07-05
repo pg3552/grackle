@@ -10,6 +10,7 @@ cdef extern from "grackle_chemistry_data.h":
         int primordial_chemistry
         int metal_cooling
         int h2_on_dust
+        int use_dust_density_field
         int cmb_temperature_floor
         char *grackle_data_file
         int three_body_rate
@@ -19,6 +20,7 @@ cdef extern from "grackle_chemistry_data.h":
         int CaseBRecombination
         int UVbackground
         double SolarMetalFractionByMass
+        double local_dust_to_gas_ratio
         int use_volumetric_heating_rate
         int use_specific_heating_rate
         int use_radiative_transfer
@@ -83,6 +85,7 @@ cdef extern from "grackle.h":
                 gr_float *HDI_density,
                 gr_float *e_density,
                 gr_float *metal_density,
+                gr_float *dust_density,
                 gr_float *volumetric_heating_rate,
                 gr_float *specific_heating_rate,
                 gr_float *RT_heating_rate,
@@ -118,6 +121,7 @@ cdef extern from "grackle.h":
                 gr_float *HDI_density,
                 gr_float *e_density,
                 gr_float *metal_density,
+                gr_float *dust_density,
                 gr_float *cooling_time,
                 gr_float *RT_heating_rate,
                 gr_float *volumetric_heating_rate,
@@ -197,3 +201,28 @@ cdef extern from "grackle.h":
                 gr_float *e_density,
                 gr_float *metal_density,
                 gr_float *temperature)
+
+    int c_calculate_dust_temperature "_calculate_dust_temperature"(
+                c_chemistry_data *my_chemistry,
+                c_chemistry_data_storage *my_rates,
+                c_code_units *my_units,
+                int grid_rank,
+                int *grid_dimension,
+                int *grid_start,
+                int *grid_end,
+                gr_float *density,
+                gr_float *internal_energy,
+                gr_float *HI_density,
+                gr_float *HII_density,
+                gr_float *HM_density,
+                gr_float *HeI_density,
+                gr_float *HeII_density,
+                gr_float *HeIII_density,
+                gr_float *H2I_density,
+                gr_float *H2II_density,
+                gr_float *DI_density,
+                gr_float *DII_density,
+                gr_float *HDI_density,
+                gr_float *e_density,
+                gr_float *metal_density,
+                gr_float *dust_temperature)

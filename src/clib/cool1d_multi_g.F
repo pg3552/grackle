@@ -6,9 +6,9 @@
       subroutine cool1d_multi_g(
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                in, jn, kn, nratec, 
-     &                iexpand, ispecies, imetal, imcool, idust, idim, 
-     &                is, ie, j, k, ih2co, ipiht, iter, igammah,
-     &                aye, temstart, temend, z_solar,
+     &                iexpand, ispecies, imetal, imcool, idust, ifdust,
+     &                idim, is, ie, j, k, ih2co, ipiht, iter, igammah,
+     &                aye, temstart, temend, z_solar, fgr,
      &                utem, uxyz, uaye, urho, utim,
      &                gamma, fh,
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
@@ -16,7 +16,7 @@
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
      &                comp_xraya, comp_temp,
      &                piHI, piHeI, piHeII, comp1, comp2,
-     &                HM, H2I, H2II, DI, DII, HDI, metal,
+     &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
      &                hyd01k, h2k01, vibh, roth, rotl,
      &                gpldla, gphdla, gpldl, gphdl,
@@ -26,7 +26,8 @@
      &                ceHI, ceHeI, ceHeII, ciHI, ciHeI, ciHeIS, ciHeII,
      &                reHII, reHeII1, reHeII2, reHeIII, brem,
      &                indixe, t1, t2, logtem, tdef, edot,
-     &                tgas, tgasold, mmw, p2d, tdust, metallicity, rhoH,
+     &                tgas, tgasold, mmw, p2d, tdust, metallicity,
+     &                dust2gas, rhoH,
      &                iradshield, avgsighi, avgsighei,
      &                avgsigheii,
      &                k24, k26, iradtrans, photogamma,
@@ -39,7 +40,6 @@
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol, umass, mt, md,
      &                itmask)
 
 !  SOLVE RADIATIVE COOLING/HEATING EQUATIONS
@@ -68,7 +68,7 @@
 !  Arguments
 
       integer in, jn, kn, is, ie, j, k, nratec, idim,
-     &        iexpand, ih2co, ipiht, ispecies, imcool, idust, 
+     &        iexpand, ih2co, ipiht, ispecies, imcool, idust, ifdust,
      &        imetal, igammah, ih2optical, iciecool, clnew,
      &        iVheat, iMheat, iradtrans, iradshield, iDustEvol
 
@@ -81,7 +81,8 @@
      &        HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &        HM(in,jn,kn),  H2I(in,jn,kn), H2II(in,jn,kn),
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
-     &        metal(in,jn,kn), Vheat(in,jn,kn), Mheat(in,jn,kn),
+     &        metal(in,jn,kn), dust(in,jn,kn), fgr(in,jn,kn),
+     &        Vheat(in,jn,kn), Mheat(in,jn,kn),
      &        photogamma(in,jn,kn)
       real*8  hyd01ka(nratec), h2k01a(nratec), vibha(nratec), 
      &        rotha(nratec), rotla(nratec), gpldla(nratec),
@@ -140,7 +141,7 @@
       integer*8 indixe(in)
       real*8 t1(in), t2(in), logtem(in), tdef(in), p2d(in),
      &       tgas(in), tgasold(in), mmw(in), tdust(in), rhoH(in),
-     &       nh(in), metallicity(in), edot(in)
+     &       nh(in), metallicity(in), dust2gas(in), edot(in)
 
 !  Cooling/heating slice locals
 
@@ -206,11 +207,21 @@
 
       if (ispecies .eq. 0) then
 
-         do i = is+1, ie+1
-            if ( itmask(i) ) then
-               rhoH(i) = fh * d(i,j,k)
-            endif
-         enddo
+!     fh is H mass fraction in metal-free gas.
+
+         if (imetal .eq. 1) then
+            do i = is+1, ie+1
+               if ( itmask(i) ) then
+                  rhoH(i) = fh * (d(i,j,k) - metal(i,j,k))
+               endif
+            enddo
+         else
+            do i = is+1, ie+1
+               if ( itmask(i) ) then
+                  rhoH(i) = fh * d(i,j,k)
+               endif
+            enddo
+         endif
 
          call calc_temp1d_cloudy_g(d, metal, e, rhoH,
      &        in, jn, kn, is, ie, j, k,
@@ -251,7 +262,9 @@
 
          if (imetal .eq. 1) then
             do i = is+1, ie+1
-               mmw(i) = mmw(i) + metal(i,j,k)/mu_metal
+               if ( itmask(i) ) then
+                  mmw(i) = mmw(i) + metal(i,j,k)/mu_metal
+               end if
             enddo
          endif
 
@@ -676,7 +689,7 @@ c  new (correct) way: (april 4, 2007)
             if ( itmask(i) ) then
                gasgr(i) = gasgra(indixe(i)) + tdef(i)
      &              *(gasgra(indixe(i)+1) -gasgra(indixe(i)))
-               gasgr_tdust(i) = gasgr(i) * coolunit / mh
+               gasgr_tdust(i) = fgr(i,j,k) * gasgr(i) * coolunit / mh
             endif
          enddo
 
@@ -685,13 +698,29 @@ c  new (correct) way: (april 4, 2007)
          call calc_tdust_1d_g(tdust, tgas, nh, gasgr_tdust, 
      &           itmask, comp2, in, is, ie, j, k)
 
+!     Calculate dust to gas ratio
+
+         if (ifdust .gt. 0) then
+            do i = is+1, ie+1
+               if ( itmask(i) ) then
+                  dust2gas(i) = dust(i,j,k) / d(i,j,k)
+               endif
+            enddo
+         else
+            do i = is+1, ie+1
+               if ( itmask(i) ) then
+                  dust2gas(i) = fgr(i,j,k) * metallicity(i)
+               endif
+            enddo
+         endif
+
 !     Calculate cooling rate
 
          do i = is+1, ie+1
             if ( itmask(i) ) then
                edot(i) = edot(i) - 
      &              gasgr(i) * (tgas(i) - tdust(i)) * 
-     &              metallicity(i) * rhoH(i) * rhoH(i)
+     &              dust2gas(i) * rhoH(i) * rhoH(i)
             endif
          enddo
 
@@ -879,7 +908,7 @@ c  new (correct) way: (april 4, 2007)
             if ( tgas(i) > 2.d4 ) then
                gammaha_eff = 0 
             else
-               gammaha_eff = gammaha
+               gammaha_eff = gammaha * fgr(i,j,k)
             endif
 
 !     Calculate electron density from mean molecular weight
@@ -891,6 +920,7 @@ c  new (correct) way: (april 4, 2007)
      &                 (d(i,j,k) * mu_metal)
                endif
                myde = d(i,j,k) * myde / mmw(i)
+               myde = max(myde, 0._DKIND)
 
                edot(i) = edot(i) 
      &              - comp1*(tgas(i)-comp2)*myde*dom_inv

@@ -5,16 +5,16 @@
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                  cooltime,
      &                in, jn, kn, nratec, iexpand, 
-     &                ispecies, imetal, imcool, idust, idim,
+     &                ispecies, imetal, imcool, idust, ifdust, idim,
      &                is, js, ks, ie, je, ke, ih2co, ipiht, igammah,
      &                aye, temstart, temend,
      &                utem, uxyz, uaye, urho, utim,
-     &                gamma, fh, z_solar,
+     &                gamma, fh, z_solar, fgr,
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
      &                ciHeISa, ciHeIIa, reHIIa, reHeII1a, 
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
      &                comp_xraya, comp_temp, piHI, piHeI, piHeII,
-     &                HM, H2I, H2II, DI, DII, HDI, metal,
+     &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
      &                gpldla, gphdla, hdltea, hdlowa,
      &                gaHIa, gaH2a, gaHea, gaHpa, gaela,
@@ -29,8 +29,7 @@
      &                metGridRank, metGridDim,
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
-     &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol, umass, mt, md)
+     &                iVheat, iMheat, Vheat, Mheat)
 
 !  SOLVE RADIATIVE COOLING/HEATING EQUATIONS
 !
@@ -60,19 +59,20 @@
 
       integer in, jn, kn, is, js, ks, ie, je, ke, nratec, 
      &        iexpand, ih2co, ipiht, ispecies, imetal, idim,
-     &        imcool, idust, igammah, ih2optical, iciecool,
-     &        clnew, iVheat, iMheat, iradtrans, iradshield, iDustEvol
+     &        imcool, idust, ifdust, igammah, ih2optical, iciecool,
+     &        clnew, iVheat, iMheat, iradtrans, iradshield
 
       real*8  aye, temstart, temend,
      &        utem, uxyz, uaye, urho, utim,
-     &        gamma, fh, z_solar, clEleFra, umass
+     &        gamma, fh, z_solar, clEleFra
       R_PREC  d(in,jn,kn),   e(in,jn,kn),
      &        u(in,jn,kn),   v(in,jn,kn),    w(in,jn,kn),
      &        de(in,jn,kn),  HI(in,jn,kn),   HII(in,jn,kn),
      &        HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &        HM(in,jn,kn),  H2I(in,jn,kn),  H2II(in,jn,kn),
      &        DI(in,jn,kn),  DII(in,jn,kn),  HDI(in,jn,kn),
-     &        metal(in,jn,kn), Vheat(in,jn,kn), Mheat(in,jn,kn),
+     &        metal(in,jn,kn), dust(in,jn,kn), fgr(in,jn,kn),
+     &        Vheat(in,jn,kn), Mheat(in,jn,kn),
      &        cooltime(in,jn,kn)
       real*8  photogamma(in,jn,kn)
       real*8  hyd01ka(nratec), h2k01a(nratec), vibha(nratec), 
@@ -88,9 +88,6 @@
      &        compa, piHI, piHeI, piHeII, comp_xraya, comp_temp,
      &        gammaha, avgsighi, avgsighei, avgsigheii,
      &        k24, k26
-
-!  Dust growth and destruction fields
-      R_PREC  mt(in,jn,kn), md(in,jn,kn)
 
 !  Cloudy cooling data
 
@@ -121,7 +118,7 @@
       integer*8 indixe(in)
       real*8 t1(in), t2(in), logtem(in), tdef(in), p2d(in),
      &       tgas(in), tgasold(in), mmw(in),
-     &       tdust(in), metallicity(in), rhoH(in)
+     &       tdust(in), metallicity(in), dust2gas(in), rhoH(in)
       real*8 edot(in)
 
 !  Cooling/heating slice locals
@@ -242,9 +239,9 @@
          call cool1d_multi_g(     
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                in, jn, kn, nratec, 
-     &                iexpand, ispecies, imetal, imcool, idust, idim,
-     &                is, ie, j, k, ih2co, ipiht, 1, igammah,
-     &                aye, temstart, temend, z_solar,
+     &                iexpand, ispecies, imetal, imcool, idust, ifdust,
+     &                idim, is, ie, j, k, ih2co, ipiht, 1, igammah,
+     &                aye, temstart, temend, z_solar, fgr,
      &                utem, uxyz, uaye, urho, utim,
      &                gamma, fh,
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
@@ -252,7 +249,7 @@
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
      &                comp_xraya, comp_temp,
      &                piHI, piHeI, piHeII, comp1, comp2,
-     &                HM, H2I, H2II, DI, DII, HDI, metal,
+     &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
      &                hyd01k, h2k01, vibh, roth, rotl,
      &                gpldla, gphdla, gpldl, gphdl,
@@ -262,7 +259,8 @@
      &                ceHI, ceHeI, ceHeII, ciHI, ciHeI, ciHeIS, ciHeII,
      &                reHII, reHeII1, reHeII2, reHeIII, brem,
      &                indixe, t1, t2, logtem, tdef, edot,
-     &                tgas, tgasold, mmw, p2d, tdust, metallicity, rhoH,
+     &                tgas, tgasold, mmw, p2d, tdust, metallicity,
+     &                dust2gas, rhoH,
      &                iradshield, avgsighi, avgsighei, avgsigheii,
      &                k24, k26, iradtrans, photogamma,
      &                ih2optical, iciecool, ciecoa, cieco,
@@ -274,7 +272,6 @@
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol, umass, mt, md,
      &                itmask)
 
 !        Compute the cooling time on the slice

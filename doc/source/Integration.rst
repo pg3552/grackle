@@ -402,6 +402,11 @@ and pointers to all field arrays.
    Pointer to the metal density field array.  Used when
    :c:data:`metal_cooling` is set to 1.
 
+.. c:var:: gr_float* dust_density
+
+   Pointer to the dust density field array.  Used when
+   :c:data:`use_dust_density_field` is set to 1.
+
 .. c:var:: gr_float* internal_energy
 
    Pointer to the internal energy field array.
@@ -624,6 +629,19 @@ Calculating the Gamma Field
   if (calculate_gamma(&my_units, &my_fields,
                       gamma) == 0) {
     fprintf(stderr, "Error in calculate_gamma.\n");
+    return EXIT_FAILURE;
+  }
+
+Calculating the Dust Temperature Field
+++++++++++++++++++++++++++++++++++++++
+
+.. code-block:: c++
+
+  gr_float *dust_temperature;
+  dust_temperature = new gr_float[field_size];
+  if (calculate_dust_temperature(&my_units, &my_fields,
+                            dust_temperature) == 0) {
+    fprintf(stderr, "Error in calculate_dust_temperature.\n");
     return EXIT_FAILURE;
   }
 

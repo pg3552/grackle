@@ -6,11 +6,11 @@
       subroutine solve_rate_cool_g(icool, d, e, u, v, w, de,
      &                HI, HII, HeI, HeII, HeIII,
      &                in, jn, kn, nratec, iexpand, 
-     &                ispecies, imetal, imcool, idust, idim,
+     &                ispecies, imetal, imcool, idust, ifdust, idim,
      &                is, js, ks, ie, je, ke, ih2co, ipiht, igammah,
      &                dx, dt, aye, temstart, temend, 
      &                utem, uxyz, uaye, urho, utim,
-     &                gamma, fh, dtoh, z_solar,
+     &                gamma, fh, dtoh, z_solar, fgr,
      &                k1a, k2a, k3a, k4a, k5a, k6a, k7a, k8a, k9a, k10a,
      &                k11a, k12a, k13a, k13dda, k14a, k15a,
      &                k16a, k17a, k18a, k19a, k22a,
@@ -23,7 +23,7 @@
      &                ciHeISa, ciHeIIa, reHIIa, reHeII1a, 
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
      &                comp_xraya, comp_temp, piHI, piHeI, piHeII,
-     &                HM, H2I, H2II, DI, DII, HDI, metal,
+     &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla, 
      &                gpldla, gphdla, hdltea, hdlowa,
      &                gaHIa, gaH2a, gaHea, gaHpa, gaela, 
@@ -42,8 +42,7 @@
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol, SolarAbd, umass, mt, md, 
-     &                met, dmet, sne)
+     &                iDustEvol, SolarAbd, met, dmet, sne)
 
 !
 !  SOLVE MULTI-SPECIES RATE EQUATIONS AND RADIATIVE COOLING
@@ -73,6 +72,8 @@
 !    HM       - H- density field
 !    H2I      - H_2 (molecular H) density field
 !    H2II     - H_2+ density field
+!    metal    - metal density field
+!    dust     - dust density field
 !    kph*     - photoionization fields
 !    gamma*   - photoheating fields
 !
@@ -83,6 +84,7 @@
 !    imetal   - flag if metal field is active (0 = no, 1 = yes)
 !    imcool   - flag if there is metal cooling
 !    idust    - flag for H2 formation on dust grains
+!    ifdust   - flag if a dust density field is present
 !    ih2co    - flag to include H2 cooling (1 = on, 0 = off)
 !    ipiht    - flag to include photoionization heating (1 = on, 0 = off)
 !    iH2shield - flag for approximate self-shielding of H2 (Wolcott-Green+ 2011)
@@ -98,6 +100,7 @@
 !    fh       - Hydrogen mass fraction (typically 0.76)
 !    dtoh     - Deuterium to H mass ratio
 !    z_solar  - Solar metal mass fraction
+!    fgr      - the local dust to gas ratio (by mass)
 !    dt       - timestep to integrate over
 !    aye      - expansion factor (in code units)
 !
@@ -134,12 +137,9 @@
 !
 !    iDustEvol   - flag for using dust growth and destruction
 !    SolarAbd    - solar element abundances
-!    umass       - mass units 
-!    mt          - array of TOTAL mass (gas + dust)
-!    md          - array of dust mass
-!    met         - array GAS metallicity array
-!    dmet        - array of dust metallicity array
-!    sne         - array of number of super novaes within dt
+!    met         - array GAS metallicity
+!    dmet        - array of DUST metallicity
+!    sne         - array of number DENSITY of super novaes per dt
 !
 !  OUTPUTS:
 !    update chemical rate densities (HI, HII, etc)
@@ -160,14 +160,14 @@
 
       integer icool, in, jn, kn, is, js, ks, ie, je, ke, nratec, 
      &        iexpand, ih2co, ipiht, ispecies, imetal, idim,
-     &        ierr, imcool, idust, 
+     &        ierr, imcool, idust, ifdust,
      &        igammah, ih2optical, iciecool, ithreebody,
      &        ndratec, clnew, iVheat, iMheat, iH2shield, iradshield,
      &        iradtrans, iradcoupled, iradstep, irt_honly, iDustEvol
 
       real*8  dx, dt, aye, temstart, temend, gamma,
      &        utim, uxyz, uaye, urho, utem, fh, dtoh, z_solar, 
-     &        dtemstart, dtemend, clEleFra, SolarAbd, umass
+     &        dtemstart, dtemend, clEleFra, SolarAbd
 
 !  Density, energy and velocity fields fields
 
@@ -177,7 +177,8 @@
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
      &        d(in,jn,kn),     e(in,jn,kn),
      &        u(in,jn,kn),    v(in,jn,kn),     w(in,jn,kn),
-     &        metal(in,jn,kn), Vheat(in,jn,kn), Mheat(in,jn,kn)
+     &        metal(in,jn,kn), dust(in,jn,kn),fgr(in,jn,kn),
+     &        Vheat(in,jn,kn), Mheat(in,jn,kn)
 
 !  Radiative transfer fields
 
@@ -189,8 +190,7 @@
       R_PREC  xH2shield(in,jn,kn)
 
 ! Dust growth and destruction fields
-      R_PREC  mt(in,jn,kn), md(in,jn,kn), met(11,in,jn,kn),
-     &        dmet(11,in,jn,kn), sne(in,jn,kn)
+      R_PREC  met(11,in,jn,kn),dmet(11,in,jn,kn), sne(in,jn,kn)
 
 !  Cooling tables (coolings rates as a function of temperature)
 
@@ -272,7 +272,8 @@
       integer*8 indixe(in)
       real*8 t1(in), t2(in), logtem(in), tdef(in),
      &       dtit(in), ttot(in), p2d(in), tgas(in), tgasold(in),
-     &       tdust(in), metallicity(in), rhoH(in), mmw(in), olddtit
+     &       tdust(in), metallicity(in), dust2gas(in),
+     &       rhoH(in), mmw(in), olddtit
 
 !  Rate equation row temporaries
 
@@ -335,10 +336,11 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 
       if (iexpand .eq. 1) then
 
-         call scale_fields_g(d, de, HI, HII, HeI, HeII, HeIII,
+         call scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                  HM, H2I, H2II, DI, DII, HDI, metal,
      &                  is, ie, js, je, ks, ke,
-     &                  in, jn, kn, ispecies, imetal, aye**(-3))
+     &                  in, jn, kn, ispecies, imetal, iDustEvol, 
+     &                  aye**(-3))
 
       endif
 
@@ -448,9 +450,9 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
             call cool1d_multi_g(
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                in, jn, kn, nratec, 
-     &                iexpand, ispecies, imetal, imcool, idust, idim,
-     &                is, ie, j, k, ih2co, ipiht, iter, igammah,
-     &                aye, temstart, temend, z_solar,
+     &                iexpand, ispecies, imetal, imcool, idust, ifdust,
+     &                idim, is, ie, j, k, ih2co, ipiht, iter, igammah,
+     &                aye, temstart, temend, z_solar, fgr,
      &                utem, uxyz, uaye, urho, utim,
      &                gamma, fh,
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
@@ -458,7 +460,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
      &                comp_xraya, comp_temp,
      &                piHI, piHeI, piHeII, comp1, comp2,
-     &                HM, H2I, H2II, DI, DII, HDI, metal,
+     &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
      &                hyd01k, h2k01, vibh, roth, rotl,
      &                gpldla, gphdla, gpldl, gphdl,
@@ -468,7 +470,8 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &                ceHI, ceHeI, ceHeII, ciHI, ciHeI, ciHeIS, ciHeII,
      &                reHII, reHeII1, reHeII2, reHeIII, brem,
      &                indixe, t1, t2, logtem, tdef, edot,
-     &                tgas, tgasold, mmw, p2d, tdust, metallicity, rhoH,
+     &                tgas, tgasold, mmw, p2d, tdust, metallicity,
+     &                dust2gas, rhoH,
      &                iradshield, avgsighi, avgsighei, avgsigheii,
      &                k24, k26,
      &                iradtrans, photogamma,
@@ -481,7 +484,6 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol,umass, mt, md,
      &                itmask)
 
             if (ispecies .gt. 0) then
@@ -494,7 +496,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
      &               in, jn, kn, ispecies, idust, iH2shield, iradshield,
      &               tgas, mmw, d, HI, HII, HeI, HeII, HeIII, 
      &               HM, H2I, H2II, DI, DII, HDI,
-     &               tdust, metallicity,
+     &               tdust, dust2gas,
      &               k1a, k2a, k3a, k4a, k5a, k6a, k7a, k8a, k9a, k10a,
      &               k11a, k12a, k13a, k13dda, k14a, k15a, k16a,
      &               k17a, k18a, k19a, k22a,
@@ -567,9 +569,9 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 !              compute minimum rate timestep
                if (iDustEvol .eq. 1) then
                    call dust_tau_for_timestep(in, jn, kn, i, j, k,
-     &                              d, tgas, mt, md, met, sne,
+     &                              d, tgas, met, sne,
      &                              tau_accr, tau_dest, tau_sput,
-     &                              SolarAbd, utim, umass, dt)
+     &                              SolarAbd, utim, urho, uxyz, dt)
                else
                    tau_accr(i) = huge8
                    tau_dest(i) = huge8
@@ -795,8 +797,8 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
             if (iDustEvol .eq. 1) then
             do i = is+1, ie+1
                 if (itmask(i)) then
-                   call dust_growth_and_destruction(in,jn,kn,i,j,k, ! CHECK: a bit memory inefficient if it passes copies instead of addresses of arrays
-     &                              d, tgas, mt, md, met, dmet, sne,
+                   call dust_growth_and_destruction(in,jn,kn,i,j,k,
+     &                              d, dust, fgr, tgas, met, dmet, sne,
      &                              tau_dest, tau_sput,
      &                              SolarAbd, utim, umass, dt)
                 endif
@@ -866,10 +868,10 @@ c            WARNING_MESSAGE
 
       if (iexpand .eq. 1) then
 
-         call scale_fields_g(d, de, HI, HII, HeI, HeII, HeIII,
+         call scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                  HM, H2I, H2II, DI, DII, HDI, metal,
      &                  is, ie, js, je, ks, ke,
-     &                  in, jn, kn, ispecies, imetal, aye**3)
+     &                  in, jn, kn, ispecies, imetal, iDustEvol, aye**3)
 
       endif
 
@@ -891,10 +893,11 @@ c -----------------------------------------------------------
 !   This routine scales the density fields from comoving to
 !     proper densities (and back again).
 
-      subroutine scale_fields_g(d, de, HI, HII, HeI, HeII, HeIII,
+      subroutine scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                        HM, H2I, H2II, DI, DII, HDI, metal,
      &                        is, ie, js, je, ks, ke,
-     &                        in, jn, kn, ispecies, imetal, factor)
+     &                        in, jn, kn, ispecies, imetal, iDustEvol, 
+     &                        factor)
 c -------------------------------------------------------------------
 
       implicit NONE
@@ -902,8 +905,9 @@ c -------------------------------------------------------------------
 
 !     Arguments
 
-      integer in, jn, kn, is, ie, js, je, ks, ke, ispecies, imetal
-      R_PREC  de(in,jn,kn),   HI(in,jn,kn),   HII(in,jn,kn),
+      integer in, jn, kn, is, ie, js, je, ks, ke, ispecies, imetal,
+     &        iDustEvol
+      R_PREC  de(in,jn,kn), sne(in,jn,kn), HI(in,jn,kn), HII(in,jn,kn),
      &        HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &        HM(in,jn,kn),  H2I(in,jn,kn), H2II(in,jn,kn),
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
@@ -965,6 +969,15 @@ c -------------------------------------------------------------------
             do j = js+1, je+1
                do i = is+1, ie+1
                   metal(i,j,k) = metal(i,j,k)*factor
+               enddo
+            enddo
+         enddo
+      endif
+      if (iDustEvol .eq. 1) then
+         do k = ks+1, ke+1
+            do j = js+1, je+1
+               do i = is+1, ie+1
+                  sne(i,j,k) = sne(i,j,k)*factor
                enddo
             enddo
          enddo
@@ -1061,7 +1074,7 @@ c -------------------------------------------------------------------
      &                ispecies, idust, iH2shield, iradshield,
      &                tgas1d, mmw, d, HI, HII, HeI, HeII, HeIII,
      &                HM, H2I, H2II, DI, DII, HDI,
-     &                tdust, metallicity,
+     &                tdust, dust2gas,
      &                k1a, k2a, k3a, k4a, k5a, k6a, k7a, k8a, k9a, k10a,
      &                k11a, k12a, k13a, k13dda, k14a, k15a, k16a,
      &                k17a, k18a, k19a, k22a,
@@ -1142,7 +1155,7 @@ c -------------------------------------------------------------------
 
       integer*8 indixe(in)
       real*8 t1(in), t2(in), logtem(in), tdef(in),
-     &       tdust(in), metallicity(in)
+     &       tdust(in), dust2gas(in)
 
 !     1D temporaries (not passed in)
 
@@ -1338,9 +1351,9 @@ c -------------------------------------------------------------------
                   h2dust(i) = dusti1(i) + 
      &                 (dusti2(i) - dusti1(i))*d_tdef(i)
 
-!                 Multiply by metallicity
+!                 Multiply by dust to gas ratio
 
-                  h2dust(i) = h2dust(i) * metallicity(i)
+                  h2dust(i) = h2dust(i) * dust2gas(i)
 
                endif
             endif

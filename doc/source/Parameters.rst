@@ -197,6 +197,44 @@ For all on/off integer flags, 0 is off and 1 is on.
    & Rees (2000) <http://adsabs.harvard.edu/abs/2000ApJ...534...11H>`_.
    Default: 0.
 
+.. c:var:: float HydrogenFractionByMass
+
+   The fraction by mass of Hydrogen in the metal-free portion of the
+   gas (i.e., just the H and He). In the non-equilibrium solver, this is
+   used to ensure consistency in the densities of the individual species.
+   In tabulated mode, this is used to calculate the H number density from
+   the total gas density, which is a parameter of the heating/cooling tables.
+   When using the non-equilibrium solver, a sensible default is 0.76.
+   However, the tables for tabulated mode were created assuming
+   n\ :sub:`He`/n\ :sub:`H` = 0.1, which corresponds to an H mass fraction of
+   about 0.716. When running in tabulated mode, this parameter will automatically
+   be changed to this value. Default: 0.76.
+
+.. c:var:: float DeuteriumToHydrogenRatio
+
+   The ratio by mass of Deuterium to Hydrogen. Default: 6.8e-5 (the value
+   from `Burles & Tytler (1998)
+   <https://ui.adsabs.harvard.edu/abs/1998ApJ...507..732B/abstract>`_
+   multiplied by 2 for the mass of Deuterium).
+
+.. c:var:: float SolarMetalFractionByMass
+
+   The fraction of total gas mass in metals for a solar composition.
+   Default: 0.01295 (consistent with the default abundances in the Cloudy code).
+
+.. c:var:: float local_dust_to_gas_ratio
+
+   The ratio of total dust mass to gas mass in the local Universe.
+   Default: 0.009387 (from `Pollack et al. 1994
+   <https://ui.adsabs.harvard.edu/abs/1994ApJ...421..615P/abstract>`_).
+
+.. c:var:: int use_dust_density_field
+
+   Flag to provide the dust density as a field using the :c:data:`dust_density`
+   pointer in the :c:type:`grackle_field_data` struct. If set to 0, the dust
+   density takes the value of :c:data:`local_dust_to_gas_ratio` multiplied
+   by the metallicity. Default: 0.
+
 .. c:var:: int use_volumetric_heating_rate
 
    Flag to signal that an array of volumetric heating rates is being

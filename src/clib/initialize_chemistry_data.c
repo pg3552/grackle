@@ -44,9 +44,7 @@ int initialize_cloudy_data(chemistry_data *my_chemistry,
 int initialize_UVbackground_data(chemistry_data *my_chemistry,
                                  chemistry_data_storage *my_rates);
 
-#ifdef DUST_EVOL
 int initialize_dust_data(chemistry_data *my_chemistry);
-#endif
 
 extern void FORTRAN_NAME(calc_rates_g)(
      int *ispecies,
@@ -76,6 +74,11 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
                                code_units *my_units)
 {
 
+  if (grackle_verbose) {
+    auto_show_version(stdout);
+    fprintf(stdout, "Initializing grackle data.\n");
+  }
+
 //initialize OpenMP
 # ifdef _OPENMP
 //number of threads
@@ -91,57 +94,20 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
 //omp_set_schedule( omp_sched_auto,    chunk_size );
 # endif
 
-  if (grackle_verbose) {
-    time_t timer;
-    char tstr[80];
-    struct tm* tm_info;
-    time(&timer);
-    tm_info = localtime(&timer);
-    strftime(tstr, 26, "%Y-%m-%d %H:%M:%S", tm_info);
-
-    FILE *fptr = fopen("GRACKLE_INFO", "w");
-    fprintf(fptr, "%s\n", tstr);
-    auto_show_version(fptr);
-    fprintf(fptr, "Grackle build options:\n");
-    auto_show_config(fptr);
-    fprintf(fptr, "Grackle build flags:\n");
-    auto_show_flags(fptr);
-    fprintf(fptr, "Grackle run-time parameters:\n");
-    show_parameters(fptr, my_chemistry);
-    fclose(fptr);
-
-    auto_show_version(stdout);
-    fprintf(stdout, "Initializing grackle data.\n");
-    fprintf(stdout, "Grackle run-time parameters:\n");
-    show_parameters(stdout, my_chemistry);
-
-#   ifdef _OPENMP
-    int omp_nthread, omp_chunk_size;
-    omp_sched_t omp_schedule;
-
-    omp_get_schedule( &omp_schedule, &omp_chunk_size );
-#   pragma omp parallel
-#   pragma omp master
-    { omp_nthread = omp_get_num_threads(); }
-
-    fprintf( stdout, "OpenMP: on\n" );
-    fprintf( stdout, "  num_threads: %d\n", omp_nthread );
-    fprintf( stdout, "  schedule: %s\n", ( omp_schedule == omp_sched_static  ) ? "static"  :
-                                         ( omp_schedule == omp_sched_dynamic ) ? "dynamic" :
-                                         ( omp_schedule == omp_sched_guided  ) ? "guided"  :
-                                         ( omp_schedule == omp_sched_auto    ) ? "auto"    :
-                                                                                 "unknown" );
-    fprintf( stdout, "  chunk size: %d\n", omp_chunk_size );
-#   else
-    fprintf( stdout, "OpenMP: off\n" );
-#   endif
-  }
-
   /* Only allow a units to be one with proper coordinates. */
   if (my_units->comoving_coordinates == FALSE && 
       my_units->a_units != 1.0) {
     fprintf(stderr, "ERROR: a_units must be 1.0 if comoving_coordinates is 0.\n");
     return FAIL;
+  }
+
+  if (my_chemistry->primordial_chemistry == 0) {
+    /* In fully tabulated mode, set H mass fraction according to
+       the abundances in Cloudy, which assumes n_He / n_H = 0.1.
+       This gives a value of about 0.716. Using the default value
+       of 0.76 will result in negative electron densities at low
+       temperature. Below, we set X = 1 / (1 + m_He * n_He / n_H). */
+    my_chemistry->HydrogenFractionByMass = 1. / (1. + 0.1 * 3.971);
   }
 
   /* Allocate CoolData space for rates. */
@@ -332,13 +298,55 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
     return FAIL;
   }
 
-#ifdef DUST_EVOL
   /* Initialize dust evolution data */
   if (initialize_dust_data(my_chemistry) == FAIL) {
     fprintf(stderr, "Error in initialize_dust_data.\n");
     return FAIL;
   }
-#endif
+
+  if (grackle_verbose) {
+    time_t timer;
+    char tstr[80];
+    struct tm* tm_info;
+    time(&timer);
+    tm_info = localtime(&timer);
+    strftime(tstr, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+
+    FILE *fptr = fopen("GRACKLE_INFO", "w");
+    fprintf(fptr, "%s\n", tstr);
+    auto_show_version(fptr);
+    fprintf(fptr, "Grackle build options:\n");
+    auto_show_config(fptr);
+    fprintf(fptr, "Grackle build flags:\n");
+    auto_show_flags(fptr);
+    fprintf(fptr, "Grackle run-time parameters:\n");
+    show_parameters(fptr, my_chemistry);
+    fclose(fptr);
+
+    fprintf(stdout, "Grackle run-time parameters:\n");
+    show_parameters(stdout, my_chemistry);
+
+#   ifdef _OPENMP
+    int omp_nthread, omp_chunk_size;
+    omp_sched_t omp_schedule;
+
+    omp_get_schedule( &omp_schedule, &omp_chunk_size );
+#   pragma omp parallel
+#   pragma omp master
+    { omp_nthread = omp_get_num_threads(); }
+
+    fprintf( stdout, "OpenMP: on\n" );
+    fprintf( stdout, "  num_threads: %d\n", omp_nthread );
+    fprintf( stdout, "  schedule: %s\n", ( omp_schedule == omp_sched_static  ) ? "static"  :
+                                         ( omp_schedule == omp_sched_dynamic ) ? "dynamic" :
+                                         ( omp_schedule == omp_sched_guided  ) ? "guided"  :
+                                         ( omp_schedule == omp_sched_auto    ) ? "auto"    :
+                                                                                 "unknown" );
+    fprintf( stdout, "  chunk size: %d\n", omp_chunk_size );
+#   else
+    fprintf( stdout, "OpenMP: off\n" );
+#   endif
+  }
 
   return SUCCESS;
 }
@@ -373,6 +381,8 @@ void show_parameters(FILE *fp, chemistry_data *my_chemistry)
           my_chemistry->Gamma);
   fprintf(fp, "h2_on_dust                        = %d\n",
           my_chemistry->h2_on_dust);
+  fprintf(fp, "use_dust_density_field            = %d\n",
+          my_chemistry->use_dust_density_field);
   fprintf(fp, "photoelectric_heating             = %d\n",
           my_chemistry->photoelectric_heating);
   fprintf(fp, "photoelectric_heating_rate        = %g\n",
@@ -397,6 +407,8 @@ void show_parameters(FILE *fp, chemistry_data *my_chemistry)
           my_chemistry->DeuteriumToHydrogenRatio);
   fprintf(fp, "SolarMetalFractionByMass          = %g\n",
           my_chemistry->SolarMetalFractionByMass);
+  fprintf(fp, "local_dust_to_gas_ratio           = %g\n",
+          my_chemistry->local_dust_to_gas_ratio);
   fprintf(fp, "NumberOfTemperatureBins           = %d\n",
           my_chemistry->NumberOfTemperatureBins);
   fprintf(fp, "CaseBRecombination                = %d\n",

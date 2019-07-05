@@ -44,6 +44,7 @@ chemistry_data _set_default_chemistry_parameters(void)
   my_chemistry.primordial_chemistry           = FALSE;  // off
   my_chemistry.metal_cooling                  = FALSE;
   my_chemistry.h2_on_dust                     = FALSE;
+  my_chemistry.use_dust_density_field         = FALSE;
 
   my_chemistry.cmb_temperature_floor          = TRUE;   // use CMB floor.
   my_chemistry.grackle_data_file              = "";
@@ -83,6 +84,12 @@ chemistry_data _set_default_chemistry_parameters(void)
      cooling tables.
   */
   my_chemistry.SolarMetalFractionByMass     = 0.01295; // Cloudy v13 abundances
+
+  /*
+    The dust to gas ratio in local molecular clouds.
+     Table 2 from Pollack et al. (1994).
+  */
+  my_chemistry.local_dust_to_gas_ratio      = 0.009387;
 
   my_chemistry.NumberOfTemperatureBins      = 600;
   my_chemistry.ih2co                        = 1;

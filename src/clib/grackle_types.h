@@ -50,7 +50,8 @@ typedef struct
   gr_float *DII_density;
   gr_float *HDI_density;
   gr_float *e_density;
-  gr_float *metal_density; //CHECK
+  gr_float *metal_density;
+  gr_float *dust_density;
 
   gr_float *internal_energy;
   gr_float *x_velocity;
@@ -68,8 +69,6 @@ typedef struct
 
   gr_float *H2_self_shielding_length;
   
-  gr_float *Mass; // gas + dust mass
-  gr_float *dust_Mass;
   gr_float (*Metallicity)[11];
   gr_float (*dust_Metallicity)[11];
   gr_float *SNe_ThisTimeStep;
@@ -87,8 +86,6 @@ typedef struct
   double velocity_units;
   double a_units;
   double a_value;
-
-  double mass_units;
 
 } code_units;
 
