@@ -167,7 +167,7 @@
 
       real*8  dx, dt, aye, temstart, temend, gamma,
      &        utim, uxyz, uaye, urho, utem, fh, dtoh, z_solar, 
-     &        dtemstart, dtemend, clEleFra, SolarAbd
+     &        fgr, dtemstart, dtemend, clEleFra, SolarAbd
 
 !  Density, energy and velocity fields fields
 
@@ -177,7 +177,7 @@
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
      &        d(in,jn,kn),     e(in,jn,kn),
      &        u(in,jn,kn),    v(in,jn,kn),     w(in,jn,kn),
-     &        metal(in,jn,kn), dust(in,jn,kn),fgr(in,jn,kn),
+     &        metal(in,jn,kn), dust(in,jn,kn),
      &        Vheat(in,jn,kn), Mheat(in,jn,kn)
 
 !  Radiative transfer fields
@@ -798,7 +798,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
             do i = is+1, ie+1
                 if (itmask(i)) then
                    call dust_growth_and_destruction(in,jn,kn,i,j,k,
-     &                              d, dust, fgr, tgas, met, dmet, sne,
+     &                              d, dust, tgas, met, dmet, sne,
      &                              tau_dest, tau_sput,
      &                              SolarAbd, utim, umass, dt)
                 endif

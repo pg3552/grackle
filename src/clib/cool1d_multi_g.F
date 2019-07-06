@@ -72,7 +72,7 @@
      &        imetal, igammah, ih2optical, iciecool, clnew,
      &        iVheat, iMheat, iradtrans, iradshield, iDustEvol
 
-      real*8  aye, temstart, temend, z_solar,
+      real*8  aye, temstart, temend, z_solar, fgr,
      &        utem, uxyz, uaye, urho, utim,
      &        gamma, fh, clEleFra, umass
       R_PREC  d(in,jn,kn),    e(in,jn,kn),
@@ -81,7 +81,7 @@
      &        HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &        HM(in,jn,kn),  H2I(in,jn,kn), H2II(in,jn,kn),
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
-     &        metal(in,jn,kn), dust(in,jn,kn), fgr(in,jn,kn),
+     &        metal(in,jn,kn), dust(in,jn,kn),
      &        Vheat(in,jn,kn), Mheat(in,jn,kn),
      &        photogamma(in,jn,kn)
       real*8  hyd01ka(nratec), h2k01a(nratec), vibha(nratec), 
@@ -689,7 +689,7 @@ c  new (correct) way: (april 4, 2007)
             if ( itmask(i) ) then
                gasgr(i) = gasgra(indixe(i)) + tdef(i)
      &              *(gasgra(indixe(i)+1) -gasgra(indixe(i)))
-               gasgr_tdust(i) = fgr(i,j,k) * gasgr(i) * coolunit / mh
+               gasgr_tdust(i) = fgr * gasgr(i) * coolunit / mh
             endif
          enddo
 
@@ -709,7 +709,7 @@ c  new (correct) way: (april 4, 2007)
          else
             do i = is+1, ie+1
                if ( itmask(i) ) then
-                  dust2gas(i) = fgr(i,j,k) * metallicity(i)
+                  dust2gas(i) = fgr * metallicity(i)
                endif
             enddo
          endif
@@ -908,7 +908,7 @@ c  new (correct) way: (april 4, 2007)
             if ( tgas(i) > 2.d4 ) then
                gammaha_eff = 0 
             else
-               gammaha_eff = gammaha * fgr(i,j,k)/0.009387d0
+               gammaha_eff = gammaha * dust2gas(i)/0.009387d0
             endif
 
 !     Calculate electron density from mean molecular weight

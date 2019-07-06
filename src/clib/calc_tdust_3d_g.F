@@ -44,8 +44,8 @@
       integer in, jn, kn, is, js, ks, ie, je, ke, nratec,
      &        iexpand, ispecies, idim
       real*8  aye, temstart, temend,
-     &        utem, uxyz, uaye, urho, utim
-      R_PREC  d(in,jn,kn), fgr(in,jn,kn),
+     &        utem, uxyz, uaye, urho, utim, fgr
+      R_PREC  d(in,jn,kn),
      &     de(in,jn,kn),   HI(in,jn,kn),   HII(in,jn,kn),
      &     HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &     HM(in,jn,kn),  H2I(in,jn,kn), H2II(in,jn,kn),
@@ -152,7 +152,7 @@
 
            gasgr(i) = gasgra(indixe(i)) + tdef(i)
      &          *(gasgra(indixe(i)+1) -gasgra(indixe(i)))
-           gasgr(i) = gasgr(i) * fgr(i,j,k) * coolunit / mh
+           gasgr(i) = gasgr(i) * fgr * coolunit / mh
 
         enddo
 
