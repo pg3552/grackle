@@ -246,8 +246,7 @@ int local_calculate_cooling_time(chemistry_data *my_chemistry,
                               my_fields->dust_density,
                               cooling_time, my_fields->RT_heating_rate,
                               my_fields->volumetric_heating_rate,
-                              my_fields->specific_heating_rate,
-							  my_fields->Mass, my_fields->dust_Mass) == FAIL) {
+                              my_fields->specific_heating_rate) == FAIL) {
     fprintf(stderr, "Error in _calculate_cooling_time.\n");
     return FAIL;
   }
