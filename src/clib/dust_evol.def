@@ -1,3 +1,5 @@
+#define NUM_METAL_SPECIES 11
+
 #ifdef CONFIG_BFLOAT_4
 
 #define SEC_PER_YEAR              3.155e7

@@ -800,7 +800,7 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
                    call dust_growth_and_destruction(in,jn,kn,i,j,k,
      &                              d, dust, tgas, met, dmet, sne,
      &                              tau_dest, tau_sput,
-     &                              SolarAbd, utim, umass, dt)
+     &                              SolarAbd, utim, urho, uxyz, dt)
                 endif
             enddo
             endif

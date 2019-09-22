@@ -1,3 +1,5 @@
+#define NUM_METAL_SPECIES 11
+
 #define SEC_PER_YEAR 3.155e7
 #define DUST_DESTRUCTION_EFF 0.3
 #define SNE_COEFF 1.0 // SNEENERGY/1e51 erg
