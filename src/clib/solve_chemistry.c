@@ -356,7 +356,7 @@ int local_solve_chemistry(chemistry_data *my_chemistry,
     &my_chemistry->use_volumetric_heating_rate,
     &my_chemistry->use_specific_heating_rate,
     my_fields->volumetric_heating_rate,
-    my_fields->specific_heating_rate
+    my_fields->specific_heating_rate,
     &my_chemistry->use_dust_evol,
     &my_chemistry->SolarAbundances,
     my_fields->Metallicity,
@@ -422,7 +422,7 @@ int _solve_chemistry(chemistry_data *my_chemistry,
   my_fields.H2_self_shielding_length = H2_self_shielding_length;
   my_fields.Metallicity              = Metallicity;
   my_fields.dust_Metallicity         = dust_Metallicity;
-  my_fields.SNe_ThisTimeStep         = SNe_ThisTimeStep
+  my_fields.SNe_ThisTimeStep         = SNe_ThisTimeStep;
 
   if (local_solve_chemistry(my_chemistry, my_rates,
                             my_units, &my_fields, dt_value) == FAIL) {
