@@ -50,6 +50,8 @@ cdef extern from "grackle_chemistry_data.h":
         int radiative_transfer_hydrogen_only
         int self_shielding_method
         int H2_self_shielding
+        int use_dust_evol
+        double *SolarAbundances
 
     ctypedef struct c_chemistry_data_storage "chemistry_data_storage":
         double k24

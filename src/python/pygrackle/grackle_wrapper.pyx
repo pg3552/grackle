@@ -317,6 +317,18 @@ cdef class chemistry_data:
         def __set__(self, val):
             self.data.H2_self_shielding = val
 
+    property use_dust_evol:
+        def __get__(self):
+            return self.data.use_dust_evol
+        def __set__(self, val):
+            self.data.use_dust_evol = val
+
+    property SolarAbundances:
+        def __get__(self):
+            return self.data.SolarAbundances
+        def __set__(self, val):
+            self.data.SolarAbundances = val
+
     property k24:
         def __get__(self):
             return self.rates.k24
