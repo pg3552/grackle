@@ -245,37 +245,31 @@ cdef class chemistry_data:
         def __set__(self, val):
             self.data.LWbackground_intensity = val
 
-    property  UVbackground_intensity:
+    property UVbackground_redshift_on:
         def __get__(self):
-            return self.data. UVbackground_intensity
+            return self.data. UVbackground_redshift_on
         def __set__(self, val):
-            self.data. UVbackground_intensity = val
+            self.data. UVbackground_redshift_on = val
 
-    property  UVbackground_on:
+    property UVbackground_redshift_off:
         def __get__(self):
-            return self.data. UVbackground_on
+            return self.data. UVbackground_redshift_off
         def __set__(self, val):
-            self.data. UVbackground_on = val
+            self.data. UVbackground_redshift_off = val
 
-    property  UVbackground_off:
+    property UVbackground_redshift_fullon:
         def __get__(self):
-            return self.data. UVbackground_off
+            return self.data. UVbackground_redshift_fullon
         def __set__(self, val):
-            self.data. UVbackground_off = val
+            self.data. UVbackground_redshift_fullon = val
 
-    property  UVbackground_fullon:
+    property UVbackground_redshift_drop:
         def __get__(self):
-            return self.data. UVbackground_fullon
+            return self.data. UVbackground_redshift_drop
         def __set__(self, val):
-            self.data. UVbackground_fullon = val
+            self.data. UVbackground_redshift_drop = val
 
-    property  UVbackground_drop:
-        def __get__(self):
-            return self.data. UVbackground_drop
-        def __set__(self, val):
-            self.data. UVbackground_drop = val
-
-    property  cloudy_electron_fraction_factor:
+    property cloudy_electron_fraction_factor:
         def __get__(self):
             return self.data. cloudy_electron_fraction_factor
         def __set__(self, val):
