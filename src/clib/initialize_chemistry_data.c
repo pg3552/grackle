@@ -44,8 +44,6 @@ int initialize_cloudy_data(chemistry_data *my_chemistry,
 int initialize_UVbackground_data(chemistry_data *my_chemistry,
                                  chemistry_data_storage *my_rates);
 
-int initialize_dust_data(chemistry_data *my_chemistry);
-
 extern void FORTRAN_NAME(calc_rates_g)(
      int *ispecies, int *igammah, int *idust, int *idustall,
      int *nratec, double *aye, double *temstart, double *temend, 
@@ -326,12 +324,6 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
 
   if (initialize_UVbackground_data(my_chemistry, my_rates) == FAIL) {
     fprintf(stderr, "Error in initialize_UVbackground_data.\n");
-    return FAIL;
-  }
-
-  /* Initialize dust evolution data */
-  if (initialize_dust_data(my_chemistry) == FAIL) {
-    fprintf(stderr, "Error in initialize_dust_data.\n");
     return FAIL;
   }
 

@@ -1,4 +1,5 @@
 #include "phys_const.def"
+#include "dust_evol.def"
 
 !=======================================================================
 !///////////////////  SUBROUTINE SOLVE_RATE_COOL_G  \\\\\\\\\\\\\\\\\\\\\
@@ -193,7 +194,8 @@
       R_PREC  xH2shield(in,jn,kn)
 
 ! Dust growth and destruction fields
-      R_PREC  met(11,in,jn,kn),dmet(11,in,jn,kn), sne(in,jn,kn)
+      R_PREC  met(NUM_METAL_SPECIES,in,jn,kn),
+     &        dmet(NUM_METAL_SPECIES,in,jn,kn), sne(in,jn,kn)
 
 !  Cooling tables (coolings rates as a function of temperature)
 

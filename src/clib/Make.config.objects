@@ -32,11 +32,10 @@ OBJS_CONFIG_LIB = \
         cool1d_cloudy_old_tables_g.lo \
         cool1d_multi_g.lo \
         cool_multi_time_g.lo \
-		dust_growth_and_destruction.lo \
+        dust_growth_and_destruction.lo \
         initialize_chemistry_data.lo \
         initialize_cloudy_data.lo \
         initialize_UVbackground_data.lo \
-		initialize_dust_data.lo \
         interpolators_g.lo \
         set_default_chemistry_parameters.lo \
         solve_chemistry.lo \
