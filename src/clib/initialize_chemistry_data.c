@@ -102,6 +102,13 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
 
   }
 
+  if (my_chemistry->dust_chemistry == 2) {
+    if (grackle_verbose) {
+      fprintf(stdout, "dust_chemistry set to 2, setting use_dust_evol to 1.\n");
+    }
+    my_chemistry->use_dust_evol = 1;
+  }
+
 //initialize OpenMP
 # ifdef _OPENMP
 //number of threads
