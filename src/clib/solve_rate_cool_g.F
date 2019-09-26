@@ -45,7 +45,11 @@
      &                metPar1, metPar2, metPar3, metPar4, metPar5,
      &                metDataSize, metCooling, metHeating, clnew,
      &                iVheat, iMheat, Vheat, Mheat,
-     &                iDustEvol, SolarAbd, met, dmet, sne)
+     &                iDustEvol, SolarAbd,
+     &                met1, met2, met3, met4, met5, met6,
+     &                met7, met8, met9, met10, met11,
+     &                dmet1, dmet2, dmet3, dmet4, dmet5, dmet6,
+     &                dmet7, dmet8, dmet9, dmet10, dmet11, sne)
 
 !
 !  SOLVE MULTI-SPECIES RATE EQUATIONS AND RADIATIVE COOLING
@@ -171,7 +175,8 @@
 
       real*8  dx, dt, aye, temstart, temend, gamma,
      &        utim, uxyz, uaye, urho, utem, fh, dtoh, z_solar, 
-     &        fgr, dtemstart, dtemend, clEleFra, SolarAbd
+     &        fgr, dtemstart, dtemend, clEleFra,
+     &        SolarAbd(NUM_METAL_SPECIES)
 
 !  Density, energy and velocity fields fields
 
@@ -194,8 +199,17 @@
       R_PREC  xH2shield(in,jn,kn)
 
 ! Dust growth and destruction fields
-      R_PREC  met(NUM_METAL_SPECIES,in,jn,kn),
-     &        dmet(NUM_METAL_SPECIES,in,jn,kn), sne(in,jn,kn)
+      R_PREC  sne(in,jn,kn),
+     &        met1(in,jn,kn), met2(in,jn,kn), met3(in,jn,kn),
+     &        met4(in,jn,kn), met5(in,jn,kn), met6(in,jn,kn),
+     &        met7(in,jn,kn), met8(in,jn,kn), met9(in,jn,kn),
+     &        met10(in,jn,kn), met11(in,jn,kn),
+     &        dmet1(in,jn,kn), dmet2(in,jn,kn), dmet3(in,jn,kn),
+     &        dmet4(in,jn,kn), dmet5(in,jn,kn), dmet6(in,jn,kn),
+     &        dmet7(in,jn,kn), dmet8(in,jn,kn), dmet9(in,jn,kn),
+     &        dmet10(in,jn,kn), dmet11(in,jn,kn),
+     &        metpt(NUM_METAL_SPECIES),
+     &        dmetpt(NUM_METAL_SPECIES)
 
 !  Cooling tables (coolings rates as a function of temperature)
 
@@ -300,7 +314,9 @@
      &       ncrn(in), ncrd1(in), ncrd2(in)
 
 !  Dust growth and destruction timescales
+
       real*8 tau_accr(in), tau_dest(in), tau_sput(in)
+
 !  Cooling/heating row locals
 
       real*8 ceHI(in), ceHeI(in), ceHeII(in),
@@ -584,9 +600,10 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 !              compute minimum rate timestep
                if (iDustEvol .eq. 1) then
                    call dust_tau_for_timestep(in, jn, kn, i, j, k,
-     &                              d, tgas, met, sne,
-     &                              tau_accr, tau_dest, tau_sput,
-     &                              SolarAbd, utim, urho, uxyz, dt)
+     &                 d, tgas, met1, met2, met3, met4, met5, met6,
+     &                 met7, met8, met9, met10, met11, sne,
+     &                 tau_accr, tau_dest, tau_sput,
+     &                 SolarAbd, utim, urho, uxyz, aye, dt)
                else
                    tau_accr(i) = huge8
                    tau_dest(i) = huge8
@@ -814,9 +831,14 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
             do i = is+1, ie+1
                 if (itmask(i)) then
                    call dust_growth_and_destruction(in,jn,kn,i,j,k,
-     &                              d, dust, tgas, met, dmet, sne,
-     &                              tau_dest, tau_sput,
-     &                              SolarAbd, utim, urho, uxyz, dt)
+     &                  d, dust, tgas,
+     &                  met1, met2, met3, met4, met5, met6,
+     &                  met7, met8, met9, met10, met11,
+     &                  dmet1, dmet2, dmet3, dmet4, dmet5, dmet6,
+     &                  dmet7, dmet8, dmet9, dmet10, dmet11,
+     &                  sne, tau_dest, tau_sput,
+     &                  SolarAbd, utim, urho, uxyz, dt,
+     &                  metpt, dmetpt)
                 endif
             enddo
             endif
