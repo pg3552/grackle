@@ -82,7 +82,16 @@ extern void FORTRAN_NAME(solve_rate_cool_g)(
  	long long *metDataSize, double *metCooling,
         double *metHeating, int *clnew,
         int *iVheat, int *iMheat, gr_float *Vheat, gr_float *Mheat,
-        int *iDustEvol, double *SolarAbd, gr_float *met, gr_float *dmet, gr_float *sne);
+        int *iDustEvol, double *SolarAbd,
+        gr_float *met1, gr_float *met2, gr_float *met3,
+        gr_float *met4, gr_float *met5, gr_float *met6,
+        gr_float *met7, gr_float *met8, gr_float *met9,
+        gr_float *met10, gr_float *met11,
+        gr_float *dmet1, gr_float *dmet2, gr_float *dmet3,
+        gr_float *dmet4, gr_float *dmet5, gr_float *dmet6,
+        gr_float *dmet7, gr_float *dmet8, gr_float *dmet9,
+        gr_float *dmet10, gr_float *dmet11,
+        gr_float *sne);
 
 int local_solve_chemistry(chemistry_data *my_chemistry,
                           chemistry_data_storage *my_rates,
@@ -358,79 +367,99 @@ int local_solve_chemistry(chemistry_data *my_chemistry,
     my_fields->volumetric_heating_rate,
     my_fields->specific_heating_rate,
     &my_chemistry->use_dust_evol,
-    &my_chemistry->SolarAbundances,
-    my_fields->Metallicity,
-    my_fields->dust_Metallicity,
+    my_chemistry->SolarAbundances,
+    my_fields->Metallicity[0],
+    my_fields->Metallicity[1],
+    my_fields->Metallicity[2],
+    my_fields->Metallicity[3],
+    my_fields->Metallicity[4],
+    my_fields->Metallicity[5],
+    my_fields->Metallicity[6],
+    my_fields->Metallicity[7],
+    my_fields->Metallicity[8],
+    my_fields->Metallicity[9],
+    my_fields->Metallicity[10],
+    my_fields->dust_Metallicity[0],
+    my_fields->dust_Metallicity[1],
+    my_fields->dust_Metallicity[2],
+    my_fields->dust_Metallicity[3],
+    my_fields->dust_Metallicity[4],
+    my_fields->dust_Metallicity[5],
+    my_fields->dust_Metallicity[6],
+    my_fields->dust_Metallicity[7],
+    my_fields->dust_Metallicity[8],
+    my_fields->dust_Metallicity[9],
+    my_fields->dust_Metallicity[10],
     my_fields->SNe_ThisTimeStep);
 
   return SUCCESS;
 
 }
 
-int _solve_chemistry(chemistry_data *my_chemistry,
-                     chemistry_data_storage *my_rates,
-                     code_units *my_units, double dt_value, double dx_value,
-                     int grid_rank, int *grid_dimension,
-                     int *grid_start, int *grid_end,
-                     gr_float *density, gr_float *internal_energy,
-                     gr_float *x_velocity, gr_float *y_velocity, gr_float *z_velocity,
-                     gr_float *HI_density, gr_float *HII_density, gr_float *HM_density,
-                     gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density,
-                     gr_float *H2I_density, gr_float *H2II_density,
-                     gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density,
-                     gr_float *e_density, gr_float *metal_density, gr_float *dust_density,
-                     gr_float *volumetric_heating_rate, gr_float *specific_heating_rate,
-                     gr_float *RT_heating_rate, gr_float *RT_HI_ionization_rate, gr_float *RT_HeI_ionization_rate,
-                     gr_float *RT_HeII_ionization_rate, gr_float *RT_H2_dissociation_rate,
-                     gr_float *H2_self_shielding_length,
-                     gr_float (*Metallicity)[11], gr_float (*dust_Metallicity)[11],
-                     gr_float *SNe_ThisTimeStep)
-{
+/* int _solve_chemistry(chemistry_data *my_chemistry, */
+/*                      chemistry_data_storage *my_rates, */
+/*                      code_units *my_units, double dt_value, double dx_value, */
+/*                      int grid_rank, int *grid_dimension, */
+/*                      int *grid_start, int *grid_end, */
+/*                      gr_float *density, gr_float *internal_energy, */
+/*                      gr_float *x_velocity, gr_float *y_velocity, gr_float *z_velocity, */
+/*                      gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, */
+/*                      gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, */
+/*                      gr_float *H2I_density, gr_float *H2II_density, */
+/*                      gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, */
+/*                      gr_float *e_density, gr_float *metal_density, gr_float *dust_density, */
+/*                      gr_float *volumetric_heating_rate, gr_float *specific_heating_rate, */
+/*                      gr_float *RT_heating_rate, gr_float *RT_HI_ionization_rate, gr_float *RT_HeI_ionization_rate, */
+/*                      gr_float *RT_HeII_ionization_rate, gr_float *RT_H2_dissociation_rate, */
+/*                      gr_float *H2_self_shielding_length, */
+/*                      gr_float *Metallicity[11], gr_float *dust_Metallicity[11], */
+/*                      gr_float *SNe_ThisTimeStep) */
+/* { */
 
-  grackle_field_data my_fields;
-  my_fields.grid_dx                  = dx_value;
-  my_fields.grid_rank                = grid_rank;
-  my_fields.grid_dimension           = grid_dimension;
-  my_fields.grid_start               = grid_start;
-  my_fields.grid_end                 = grid_end;
-  my_fields.density                  = density;
-  my_fields.internal_energy          = internal_energy;
-  my_fields.x_velocity               = x_velocity;
-  my_fields.y_velocity               = y_velocity;
-  my_fields.z_velocity               = z_velocity;
-  my_fields.HI_density               = HI_density;
-  my_fields.HII_density              = HII_density;
-  my_fields.HM_density               = HM_density;
-  my_fields.HeI_density              = HeI_density;
-  my_fields.HeII_density             = HeII_density;
-  my_fields.HeIII_density            = HeIII_density;
-  my_fields.H2I_density              = H2I_density;
-  my_fields.H2II_density             = H2II_density;
-  my_fields.DI_density               = DI_density;
-  my_fields.DII_density              = DII_density;
-  my_fields.HDI_density              = HDI_density;
-  my_fields.e_density                = e_density;
-  my_fields.metal_density            = metal_density;
-  my_fields.dust_density             = dust_density;
-  my_fields.volumetric_heating_rate  = volumetric_heating_rate;
-  my_fields.specific_heating_rate    = specific_heating_rate;
-  my_fields.RT_heating_rate          = RT_heating_rate;
-  my_fields.RT_HI_ionization_rate    = RT_HI_ionization_rate;
-  my_fields.RT_HeI_ionization_rate   = RT_HeI_ionization_rate;
-  my_fields.RT_HeII_ionization_rate  = RT_HeII_ionization_rate;
-  my_fields.RT_H2_dissociation_rate  = RT_H2_dissociation_rate;
-  my_fields.H2_self_shielding_length = H2_self_shielding_length;
-  my_fields.Metallicity              = Metallicity;
-  my_fields.dust_Metallicity         = dust_Metallicity;
-  my_fields.SNe_ThisTimeStep         = SNe_ThisTimeStep;
+/*   grackle_field_data my_fields; */
+/*   my_fields.grid_dx                  = dx_value; */
+/*   my_fields.grid_rank                = grid_rank; */
+/*   my_fields.grid_dimension           = grid_dimension; */
+/*   my_fields.grid_start               = grid_start; */
+/*   my_fields.grid_end                 = grid_end; */
+/*   my_fields.density                  = density; */
+/*   my_fields.internal_energy          = internal_energy; */
+/*   my_fields.x_velocity               = x_velocity; */
+/*   my_fields.y_velocity               = y_velocity; */
+/*   my_fields.z_velocity               = z_velocity; */
+/*   my_fields.HI_density               = HI_density; */
+/*   my_fields.HII_density              = HII_density; */
+/*   my_fields.HM_density               = HM_density; */
+/*   my_fields.HeI_density              = HeI_density; */
+/*   my_fields.HeII_density             = HeII_density; */
+/*   my_fields.HeIII_density            = HeIII_density; */
+/*   my_fields.H2I_density              = H2I_density; */
+/*   my_fields.H2II_density             = H2II_density; */
+/*   my_fields.DI_density               = DI_density; */
+/*   my_fields.DII_density              = DII_density; */
+/*   my_fields.HDI_density              = HDI_density; */
+/*   my_fields.e_density                = e_density; */
+/*   my_fields.metal_density            = metal_density; */
+/*   my_fields.dust_density             = dust_density; */
+/*   my_fields.volumetric_heating_rate  = volumetric_heating_rate; */
+/*   my_fields.specific_heating_rate    = specific_heating_rate; */
+/*   my_fields.RT_heating_rate          = RT_heating_rate; */
+/*   my_fields.RT_HI_ionization_rate    = RT_HI_ionization_rate; */
+/*   my_fields.RT_HeI_ionization_rate   = RT_HeI_ionization_rate; */
+/*   my_fields.RT_HeII_ionization_rate  = RT_HeII_ionization_rate; */
+/*   my_fields.RT_H2_dissociation_rate  = RT_H2_dissociation_rate; */
+/*   my_fields.H2_self_shielding_length = H2_self_shielding_length; */
+/*   my_fields.Metallicity              = Metallicity; */
+/*   my_fields.dust_Metallicity         = dust_Metallicity; */
+/*   my_fields.SNe_ThisTimeStep         = SNe_ThisTimeStep; */
 
-  if (local_solve_chemistry(my_chemistry, my_rates,
-                            my_units, &my_fields, dt_value) == FAIL) {
-    fprintf(stderr, "Error in local_solve_chemistry.\n");
-    return FAIL;
-  }
-  return SUCCESS;
-}
+/*   if (local_solve_chemistry(my_chemistry, my_rates, */
+/*                             my_units, &my_fields, dt_value) == FAIL) { */
+/*     fprintf(stderr, "Error in local_solve_chemistry.\n"); */
+/*     return FAIL; */
+/*   } */
+/*   return SUCCESS; */
+/* } */
 
 int solve_chemistry(code_units *my_units,
                     grackle_field_data *my_fields,
