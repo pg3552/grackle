@@ -63,9 +63,12 @@ int main(int argc, char *argv[])
   grackle_data->use_grackle = 1;            // chemistry on
   grackle_data->with_radiative_cooling = 1; // cooling on
   grackle_data->primordial_chemistry = 3;   // molecular network with H, He, D
+  grackle_data->dust_chemistry = 1;
   grackle_data->metal_cooling = 1;          // metal cooling on
   grackle_data->UVbackground = 1;           // UV background on
   grackle_data->grackle_data_file = "../../input/CloudyData_UVB=HM2012.h5"; // data file
+
+  grackle_data->use_dust_evol = 1;
 
   // Finally, initialize the chemistry object.
   if (initialize_chemistry_data(&my_units) == 0) {
@@ -116,6 +119,7 @@ int main(int argc, char *argv[])
   my_fields.HDI_density     = new gr_float[field_size];
   // for metal_cooling = 1
   my_fields.metal_density   = new gr_float[field_size];
+  my_fields.dust_density    = new gr_float[field_size];
 
   // volumetric heating rate (provide in units [erg s^-1 cm^-3])
   my_fields.volumetric_heating_rate = new gr_float[field_size];
@@ -129,6 +133,13 @@ int main(int argc, char *argv[])
   my_fields.RT_H2_dissociation_rate = new gr_float[field_size];
   // radiative transfer heating rate (provide in units [erg s^-1 cm^-3])
   my_fields.RT_heating_rate = new gr_float[field_size];
+
+  my_fields.SNe_ThisTimeStep = new gr_float[field_size];
+
+  for (int f = 0;f < 11;f++) {
+    my_fields.Metallicity[f] = new gr_float[field_size];
+    my_fields.dust_Metallicity[f] = new gr_float[field_size];
+  }
 
   // set temperature units
   double temperature_units = mh * pow(my_units.a_units * 
@@ -155,6 +166,8 @@ int main(int argc, char *argv[])
     // solar metallicity
     my_fields.metal_density[i] = grackle_data->SolarMetalFractionByMass *
       my_fields.density[i];
+    my_fields.metal_density[i] = grackle_data->local_dust_to_gas_ratio *
+      my_fields.density[i];
 
     my_fields.x_velocity[i] = 0.0;
     my_fields.y_velocity[i] = 0.0;
@@ -171,6 +184,13 @@ int main(int argc, char *argv[])
     my_fields.RT_HeII_ionization_rate[i] = 0.0;
     my_fields.RT_H2_dissociation_rate[i] = 0.0;
     my_fields.RT_heating_rate[i] = 0.0;
+
+    my_fields.SNe_ThisTimeStep[i] = 0.0; // what is a normal value?
+
+    for (int f = 0;f < 11;f++) {
+      my_fields.Metallicity[f][i] = 0.1;
+      my_fields.dust_Metallicity[f][i] = 0.1;
+    }
   }
 
   /*********************************************************************
@@ -212,6 +232,8 @@ int main(int argc, char *argv[])
 
   // Calculate pressure.
   gr_float *pressure;
+  double pressure_units = my_units.density_units *
+    pow(my_units.velocity_units, 2);
   pressure = new gr_float[field_size];
   if (calculate_pressure(&my_units, &my_fields,
                          pressure) == 0) {
@@ -219,7 +241,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  fprintf(stderr, "Pressure = %le.\n", pressure[0]);
+  fprintf(stderr, "Pressure = %le dyne/cm^2.\n", pressure[0]*pressure_units);
 
   // Calculate gamma.
   gr_float *gamma;
@@ -241,7 +263,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  fprintf(stderr, "dust_temperature = %g.\n", dust_temperature[0]);
+  fprintf(stderr, "dust_temperature = %g K.\n", dust_temperature[0]);
 
   _free_chemistry_data(my_grackle_data, &grackle_rates);
 

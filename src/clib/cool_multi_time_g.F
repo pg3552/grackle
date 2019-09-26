@@ -5,14 +5,16 @@
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                  cooltime,
      &                in, jn, kn, nratec, iexpand, 
-     &                ispecies, imetal, imcool, idust, ifdust, idim,
+     &                ispecies, imetal, imcool, idust,
+     &                idustall,ifdust, idim,
      &                is, js, ks, ie, je, ke, ih2co, ipiht, igammah,
      &                aye, temstart, temend,
      &                utem, uxyz, uaye, urho, utim,
      &                gamma, fh, z_solar, fgr,
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
      &                ciHeISa, ciHeIIa, reHIIa, reHeII1a, 
-     &                reHeII2a, reHeIIIa, brema, compa, gammaha,
+     &                reHeII2a, reHeIIIa, brema, compa, gammaha, isrf,
+     &                regra, gamma_isrfa,
      &                comp_xraya, comp_temp, piHI, piHeI, piHeII,
      &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
@@ -59,7 +61,8 @@
 
       integer in, jn, kn, is, js, ks, ie, je, ke, nratec, 
      &        iexpand, ih2co, ipiht, ispecies, imetal, idim,
-     &        imcool, idust, ifdust, igammah, ih2optical, iciecool,
+     &        imcool, idust, idustall,
+     &        ifdust, igammah, ih2optical, iciecool,
      &        clnew, iVheat, iMheat, iradtrans, iradshield
 
       real*8  aye, temstart, temend,
@@ -86,7 +89,8 @@
      &        ciHeIIa(nratec), reHIIa(nratec), reHeII1a(nratec), 
      &        reHeII2a(nratec), reHeIIIa(nratec), brema(nratec),
      &        compa, piHI, piHeI, piHeII, comp_xraya, comp_temp,
-     &        gammaha, avgsighi, avgsighei, avgsigheii,
+     &        gammaha, isrf, regra, gamma_isrfa,
+     &        avgsighi, avgsighei, avgsigheii,
      &        k24, k26
 
 !  Cloudy cooling data
@@ -118,7 +122,9 @@
       integer*8 indixe(in)
       real*8 t1(in), t2(in), logtem(in), tdef(in), p2d(in),
      &       tgas(in), tgasold(in), mmw(in),
-     &       tdust(in), metallicity(in), dust2gas(in), rhoH(in)
+     &       tdust(in), metallicity(in), dust2gas(in), rhoH(in),
+     &       mynh(in), myde(in), gammaha_eff(in),
+     &       gasgr_tdust(in), regr(in)
       real*8 edot(in)
 
 !  Cooling/heating slice locals
@@ -152,8 +158,8 @@
 !$omp&   indixe,
 !$omp&   t1, t2, logtem, tdef, p2d,
 !$omp&   tgas, tgasold,
-!$omp&   tdust, metallicity, rhoH, mmw,
-!$omp&   edot,
+!$omp&   tdust, metallicity, dust2gas, rhoH, mmw,
+!$omp&   mynh, myde, gammaha_eff, gasgr_tdust, regr, edot,
 !$omp&   ceHI, ceHeI, ceHeII,
 !$omp&   ciHI, ciHeI, ciHeIS, ciHeII,
 !$omp&   reHII, reHeII1, reHeII2, reHeIII,
@@ -198,6 +204,11 @@
                   metal(i,j,k) = metal(i,j,k)/real(aye**3, RKIND)
                enddo
             endif
+            if (ifdust .eq. 1) then
+               do i = is+1, ie+1
+                  dust(i,j,k) = dust(i,j,k)/real(aye**3, RKIND)
+               enddo
+            endif
       enddo
 #ifdef _OPENMP
 !$omp end parallel do
@@ -216,8 +227,8 @@
 !$omp&   indixe,
 !$omp&   t1, t2, logtem, tdef, p2d,
 !$omp&   tgas, tgasold,
-!$omp&   tdust, metallicity, rhoH, mmw,
-!$omp&   edot,
+!$omp&   tdust, metallicity, dust2gas, rhoH, mmw,
+!$omp&   mynh, myde, gammaha_eff, gasgr_tdust, regr, edot,
 !$omp&   ceHI, ceHeI, ceHeII,
 !$omp&   ciHI, ciHeI, ciHeIS, ciHeII,
 !$omp&   reHII, reHeII1, reHeII2, reHeIII,
@@ -239,7 +250,8 @@
          call cool1d_multi_g(     
      &                d, e, u, v, w, de, HI, HII, HeI, HeII, HeIII,
      &                in, jn, kn, nratec, 
-     &                iexpand, ispecies, imetal, imcool, idust, ifdust,
+     &                iexpand, ispecies, imetal, imcool,
+     &                idust, idustall, ifdust,
      &                idim, is, ie, j, k, ih2co, ipiht, 1, igammah,
      &                aye, temstart, temend, z_solar, fgr,
      &                utem, uxyz, uaye, urho, utim,
@@ -247,7 +259,7 @@
      &                ceHIa, ceHeIa, ceHeIIa, ciHIa, ciHeIa, 
      &                ciHeISa, ciHeIIa, reHIIa, reHeII1a, 
      &                reHeII2a, reHeIIIa, brema, compa, gammaha,
-     &                comp_xraya, comp_temp,
+     &                isrf, regra, gamma_isrfa, comp_xraya, comp_temp,
      &                piHI, piHeI, piHeII, comp1, comp2,
      &                HM, H2I, H2II, DI, DII, HDI, metal, dust,
      &                hyd01ka, h2k01a, vibha, rotha, rotla,
@@ -260,7 +272,8 @@
      &                reHII, reHeII1, reHeII2, reHeIII, brem,
      &                indixe, t1, t2, logtem, tdef, edot,
      &                tgas, tgasold, mmw, p2d, tdust, metallicity,
-     &                dust2gas, rhoH,
+     &                dust2gas, rhoH, mynh, myde,
+     &                gammaha_eff, gasgr_tdust, regr,
      &                iradshield, avgsighi, avgsighei, avgsigheii,
      &                k24, k26, iradtrans, photogamma,
      &                ih2optical, iciecool, ciecoa, cieco,
@@ -301,8 +314,8 @@
 !$omp&   indixe,
 !$omp&   t1, t2, logtem, tdef, p2d,
 !$omp&   tgas, tgasold,
-!$omp&   tdust, metallicity, rhoH, mmw,
-!$omp&   edot,
+!$omp&   tdust, metallicity, dust2gas, rhoH, mmw,
+!$omp&   mynh, myde, gammaha_eff, gasgr_tdust, regr, edot,
 !$omp&   ceHI, ceHeI, ceHeII,
 !$omp&   ciHI, ciHeI, ciHeIS, ciHeII,
 !$omp&   reHII, reHeII1, reHeII2, reHeIII,
@@ -345,6 +358,11 @@
             if (imetal .eq. 1) then
                do i = is+1, ie+1
                   metal(i,j,k) = metal(i,j,k)*real(aye**3, RKIND)
+               enddo
+            endif
+            if (ifdust .eq. 1) then
+               do i = is+1, ie+1
+                  dust(i,j,k) = dust(i,j,k)*real(aye**3, RKIND)
                enddo
             endif
       enddo

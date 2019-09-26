@@ -13,9 +13,10 @@ Grackle has three versions of most functions.
    and :c:data:`chemistry_data_storage` instances to be provided as
    arguments.  These are explicity thread-safe as they use no global data.
 
-3. :ref:`internal_functions` take pointers to individual field arrays
+3. (Deprecated) :ref:`internal_functions` take pointers to individual field arrays
    instead of using the :c:data:`grackle_field_data` struct.  These are
-   mainly used by the Python interface.
+   mainly used by the Python interface. These functions have been deprecated
+   and will be removed in a future version.
 
 .. _primary_functions:
 
@@ -95,9 +96,14 @@ Primary Functions
 
 .. c:function:: int calculate_dust_temperature(code_units *my_units, grackle_field_data *my_fields, gr_float *dust_temperature);
 
-   Calculates the dust temperature. For a description of how the dust
-   temperature is calculated, see Section 4.3 of `Smith et al. (2017)
-   <http://ui.adsabs.harvard.edu/abs/2017MNRAS.466.2217S>`__.
+   Calculates the dust temperature. The dust temperature calculation is
+   modified from its original version (Section 4.3 of `Smith et al. 2017
+   <http://ui.adsabs.harvard.edu/abs/2017MNRAS.466.2217S>`__) to also
+   include the heating of dust grains by the interstellar radiation field
+   following equation B15 of `Krumholz (2014)
+   <https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1662K/abstract>`__.
+
+   Using this function requires :c:data:`dust_chemistry` > 0 or :c:data:`h2_on_dust` > 0.
 
    :param code_units* my_units: code units conversions
    :param grackle_field_data* my_fields: field data storage
@@ -220,6 +226,8 @@ described here can be used in conjunction with the :ref:`local_functions`.
 
 .. c:function:: int _solve_chemistry(chemistry_data *my_chemistry, chemistry_data_storage *my_rates, code_units *my_units, double dt_value, int grid_rank, int *grid_dimension, int *grid_start, int *grid_end, gr_float *density, gr_float *internal_energy, gr_float *x_velocity, gr_float *y_velocity, gr_float *z_velocity, gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, gr_float *H2I_density, gr_float *H2II_density, gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, gr_float *e_density, gr_float *metal_density);
 
+   This function has been deprecated. Please use solve_chemistry or local_solve_chemistry.
+
    Evolves the species densities and internal energies over a given timestep
    by solving the chemistry and cooling rate equations.
 
@@ -254,6 +262,8 @@ described here can be used in conjunction with the :ref:`local_functions`.
 
 .. c:function:: int _calculate_cooling_time(chemistry_data *my_chemistry, chemistry_data_storage *my_rates, code_units *my_units, int grid_rank, int *grid_dimension, int *grid_start, int *grid_end, gr_float *density, gr_float *internal_energy, gr_float *x_velocity, gr_float *y_velocity, gr_float *z_velocity, gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, gr_float *H2I_density, gr_float *H2II_density, gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, gr_float *e_density, gr_float *metal_density, gr_float *cooling_time);
 
+   This function has been deprecated. Please use calculate_cooling_time or local_calculate_cooling_time.
+
    Calculates the instantaneous cooling time.
 
    :param chemistry_data* my_chemistry: the structure returned by :c:func:`_set_default_chemistry_parameters`
@@ -272,6 +282,8 @@ described here can be used in conjunction with the :ref:`local_functions`.
    :returns: 1 (success) or 0 (failure)
 
 .. c:function:: int _calculate_gamma(chemistry_data *my_chemistry, chemistry_data_storage *my_rates, code_units *my_units, int grid_rank, int *grid_dimension, int *grid_start, int *grid_end, gr_float *density, gr_float *internal_energy, gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, gr_float *H2I_density, gr_float *H2II_density, gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, gr_float *e_density, gr_float *metal_density, gr_float *my_gamma);
+
+   This function has been deprecated. Please use calculate_gamma or local_calculate_gamma.
 
    Calculates the effective adiabatic index.  This is only useful with 
    :c:data:`primordial_chemistry` >= 2 as the only thing that alters gamma from the single 
@@ -292,6 +304,8 @@ described here can be used in conjunction with the :ref:`local_functions`.
    :returns: 1 (success) or 0 (failure)
 
 .. c:function:: int _calculate_pressure(chemistry_data *my_chemistry, chemistry_data_storage *my_rates, code_units *my_units, int grid_rank, int *grid_dimension, int *grid_start, int *grid_end, gr_float *density, gr_float *internal_energy, gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, gr_float *H2I_density, gr_float *H2II_density, gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, gr_float *e_density, gr_float *metal_density, gr_float *pressure);
+
+   This function has been deprecated. Please use calculate_pressure or local_calculate_pressure.
 
    Calculates the gas pressure.
 
@@ -325,22 +339,6 @@ described here can be used in conjunction with the :ref:`local_functions`.
    :rtype: int
    :returns: 1 (success) or 0 (failure)
 
+   This function has been deprecated. Please use calculate_temperature or local_calculate_temperature.
+
    Calculates the gas temperature.
-
-.. c:function:: int _calculate_dust_temperature(chemistry_data *my_chemistry, chemistry_data_storage *my_rates, code_units *my_units, int grid_rank, int *grid_dimension, int *grid_start, int *grid_end, gr_float *density, gr_float *internal_energy, gr_float *HI_density, gr_float *HII_density, gr_float *HM_density, gr_float *HeI_density, gr_float *HeII_density, gr_float *HeIII_density, gr_float *H2I_density, gr_float *H2II_density, gr_float *DI_density, gr_float *DII_density, gr_float *HDI_density, gr_float *e_density, gr_float *metal_density, gr_float *dust_temperature);
-
-   :param chemistry_data* my_chemistry: the structure returned by :c:func:`_set_default_chemistry_parameters`
-   :param chemistry_data_storage* my_rates: chemistry and cooling rate data structure
-   :param code_units* my_units: code units conversions
-   :param int grid_rank: the dimensionality of the grid
-   :param int* grid_dimension: array holding the size of the baryon field in each dimension
-   :param int* grid_start: array holding the starting indices in each dimension of the active portion of the baryon fields.  This is used to ignore ghost zones
-   :param int* grid_end: array holding the ending indices in each dimension of the active portion of the baryon fields.  This is used to ignore ghost zones.
-   :param gr_float* density: array containing the density values in code units
-   :param gr_float* internal_energy: array containing the specific internal energy values in code units corresponding to *erg/g*
-   :param gr_float* HI_density, HII_density, HM_density, HeI_density, HeII_density, HeIII_density, H2I_density, H2II_density, DI_density, DII_density, HDI_density, e_density, metal_density: arrays containing the species densities in code units equivalent those of the density array
-   :param gr_float* dust_temperature: array which will be filled with the calculated dust temperature values
-   :rtype: int
-   :returns: 1 (success) or 0 (failure)
-
-   Calculates the dust temperature.

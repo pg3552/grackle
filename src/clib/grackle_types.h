@@ -69,8 +69,8 @@ typedef struct
 
   gr_float *H2_self_shielding_length;
   
-  gr_float (*Metallicity)[11];
-  gr_float (*dust_Metallicity)[11];
+  gr_float *Metallicity[11];
+  gr_float *dust_Metallicity[11];
   gr_float *SNe_ThisTimeStep;
   //gr_float *Temperature; //CHECK grackle internal_enrgy -> temperature handler
 

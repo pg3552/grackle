@@ -35,6 +35,16 @@ typedef struct
      3) + D, D+, HD */
   int primordial_chemistry;
 
+  /* dust chemistry and cooling
+     0) no dust chemistry or cooling
+     1) basic dust treatment
+        - photo-electric heating
+        - recombination cooling
+        - with primordial_chemistry > 1:
+          - H2 formation on dust grains
+          - gas/grain heat transfer */
+  int dust_chemistry;
+
   /* metal cooling on/off
      0) off, 1) on */
   int metal_cooling;
@@ -61,9 +71,11 @@ typedef struct
   int use_dust_density_field;
 
   /* photo-electric heating from irradiated dust */
-
   int photoelectric_heating;
-  double photoelectric_heating_rate; // in CGS
+  double photoelectric_heating_rate;
+
+  // local FUV interstellar radiation field in Habing units
+  double interstellar_radiation_field;
 
   /* flags to signal that arrays of volumetric or
      specific heating rates are being provided */
@@ -288,7 +300,6 @@ typedef struct
   double comp;                    // Compton cooling
   double comp_xray;               // X-ray compton heating coefficient
   double temp_xray;               // X-ray compton heating temperature (K)
-  double gammah;                  // Photoelectric heating (code units)
 
   /* radiative rates (external field). */
   double piHI;                    // photo-ionization cooling
@@ -328,6 +339,19 @@ typedef struct
 
   /* CIE cooling */
   double *cieco;
+
+  /*******************************
+   * dust chemistry/cooling data *
+   *******************************/
+
+  // Photo-electric heating (code units)
+  double gammah;
+
+  // Electron recombination onto dust grains
+  double *regr;
+
+  // Heating of dust by interstellar radiation field
+  double gamma_isrf;
 
   /* Gas/grain energy transfer. */
   double *gas_grain;

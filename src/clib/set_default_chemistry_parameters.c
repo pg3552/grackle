@@ -39,22 +39,25 @@ chemistry_data _set_default_chemistry_parameters(void)
   chemistry_data my_chemistry;
 
   my_chemistry.Gamma                          = 5./3.;
-  my_chemistry.use_grackle                    = FALSE;  // off
+  my_chemistry.use_grackle                    = FALSE;
   my_chemistry.with_radiative_cooling         = TRUE;
-  my_chemistry.primordial_chemistry           = FALSE;  // off
+  my_chemistry.primordial_chemistry           = 0;
+  my_chemistry.dust_chemistry                 = 0;
   my_chemistry.metal_cooling                  = FALSE;
   my_chemistry.h2_on_dust                     = FALSE;
   my_chemistry.use_dust_density_field         = FALSE;
 
-  my_chemistry.cmb_temperature_floor          = TRUE;   // use CMB floor.
+  my_chemistry.cmb_temperature_floor          = TRUE;
   my_chemistry.grackle_data_file              = "";
 
-  my_chemistry.three_body_rate                = 0;   // ABN02
+  my_chemistry.three_body_rate                = 0;
   my_chemistry.cie_cooling                    = 0;
   my_chemistry.h2_optical_depth_approximation = 0;
 
   my_chemistry.photoelectric_heating          = 0;
-  my_chemistry.photoelectric_heating_rate     = 8.5e-26;  // ergs cm-3 s-1
+  // epsilon=0.05, G_0=1.7 (in erg s^-1 cm^-3)
+  my_chemistry.photoelectric_heating_rate     = 8.5e-26;
+  my_chemistry.interstellar_radiation_field   = 1.7;
 
   my_chemistry.use_volumetric_heating_rate    = 0;
   my_chemistry.use_specific_heating_rate      = 0;
@@ -112,6 +115,19 @@ chemistry_data _set_default_chemistry_parameters(void)
   /* approximate self-shielding */
   my_chemistry.self_shielding_method                  = 0;
   my_chemistry.H2_self_shielding                      = 0;
+
+  my_chemistry.use_dust_evol       = 0;
+  my_chemistry.SolarAbundances[0]  = 0.0134;  // Asplund (2009)
+  my_chemistry.SolarAbundances[1]  = 0.28;    // He  (10.93 in units where log[H]=12, so photospheric mass fraction . Y=0.2485 [Hydrogen X=0.7381]; Anders+Grevesse Y=0.2485, X=0.7314)
+  my_chemistry.SolarAbundances[2]  = 3.26e-3; // C   (8.43 -> 2.38e-3, AG=3.18e-3)
+  my_chemistry.SolarAbundances[3]  = 1.32e-3; // N   (7.83 -> 0.70e-3, AG=1.15e-3)
+  my_chemistry.SolarAbundances[4]  = 8.65e-3; // O   (8.69 -> 5.79e-3, AG=9.97e-3)
+  my_chemistry.SolarAbundances[5]  = 2.22e-3; // Ne  (7.93 -> 1.26e-3, AG=1.72e-3)
+  my_chemistry.SolarAbundances[6]  = 9.31e-4; // Mg  (7.60 -> 7.14e-4, AG=6.75e-4)
+  my_chemistry.SolarAbundances[7]  = 1.08e-3; // Si  (7.51 -> 6.71e-4, AG=7.30e-4)
+  my_chemistry.SolarAbundances[8]  = 6.44e-4; // S   (7.12 -> 3.12e-4, AG=3.80e-4)
+  my_chemistry.SolarAbundances[9]  = 1.01e-4; // Ca  (6.34 -> 0.65e-4, AG=0.67e-4)
+  my_chemistry.SolarAbundances[10] = 1.73e-3; // Fe (7.50 -> 1.31e-3, AG=1.92e-3)
 
 //number of OpenMP threads
 # ifdef _OPENMP
