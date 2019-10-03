@@ -146,6 +146,8 @@ int main(int argc, char *argv[])
                                       my_units.length_units /
                                       my_units.time_units, 2) / kboltz;
 
+  double dt = 3.15e7 * 1e6 / my_units.time_units;
+
   int i;
   for (i = 0;i < field_size;i++) {
     my_fields.density[i] = 1.0;
@@ -185,7 +187,9 @@ int main(int argc, char *argv[])
     my_fields.RT_H2_dissociation_rate[i] = 0.0;
     my_fields.RT_heating_rate[i] = 0.0;
 
-    my_fields.SNe_ThisTimeStep[i] = 0.0; // what is a normal value?
+    // SFR = 1 Msun/yr
+    my_fields.SNe_ThisTimeStep[i] =
+      1.0 * 0.01067 * dt * my_units.time_units / 3.1556952E7;
 
     for (int f = 0;f < 11;f++) {
       my_fields.Metallicity[f][i] = 0.1;
@@ -200,7 +204,6 @@ int main(int argc, char *argv[])
 
   // Evolving the chemistry.
   // some timestep
-  double dt = 3.15e7 * 1e6 / my_units.time_units;
 
   if (solve_chemistry(&my_units, &my_fields, dt) == 0) {
     fprintf(stderr, "Error in solve_chemistry.\n");
