@@ -23,6 +23,7 @@ extern "C" {
 
 #define mh     1.67262171e-24   
 #define kboltz 1.3806504e-16
+#define pc     3.0856776e+18
 
 int main(int argc, char *argv[])
 {
@@ -189,7 +190,7 @@ int main(int argc, char *argv[])
 
     // SFR = 1 Msun/yr
     my_fields.SNe_ThisTimeStep[i] =
-      1.0 * 0.01067 * dt * my_units.time_units / 3.1556952E7;
+      1.0 * 0.01067 * dt * my_units.time_units / (128.0 * pc)**3;
 
     for (int f = 0;f < 11;f++) {
       my_fields.Metallicity[f][i] = 0.1;
