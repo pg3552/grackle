@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   code_units my_units;
   my_units.comoving_coordinates = 0; // 1 if cosmological sim, 0 if not
   my_units.density_units = 1.67e-24;
-  my_units.length_units = 1.0;
+  my_units.length_units = 128. * pc;
   my_units.time_units = 1.0e12;
   my_units.velocity_units = my_units.length_units / my_units.time_units;
   my_units.a_units = 1.0; // units for the expansion factor
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
     // SFR = 1 Msun/yr
     my_fields.SNe_ThisTimeStep[i] =
-      1.0 * 0.01067 * dt * my_units.time_units / pow((128.0 * pc), 3);
+      1.0 * 0.01067 * dt * my_units.time_units / pow(my_units.length_units, 3);
 
     for (int f = 0;f < 11;f++) {
       my_fields.Metallicity[f][i] = 0.1;
