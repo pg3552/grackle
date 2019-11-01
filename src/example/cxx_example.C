@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     // solar metallicity
     my_fields.metal_density[i] = grackle_data->SolarMetalFractionByMass *
       my_fields.density[i];
-    my_fields.metal_density[i] = grackle_data->local_dust_to_gas_ratio *
+    my_fields.dust_density[i] = grackle_data->local_dust_to_gas_ratio *
       my_fields.density[i];
 
     my_fields.x_velocity[i] = 0.0;
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
     // SFR = 1 Msun/yr
     my_fields.SNe_ThisTimeStep[i] =
-      1.0 * 0.01067 * dt * my_units.time_units / (128.0 * pc)**3;
+      1.0 * 0.01067 * dt * my_units.time_units / pow((128.0 * pc), 3);
 
     for (int f = 0;f < 11;f++) {
       my_fields.Metallicity[f][i] = 0.1;
