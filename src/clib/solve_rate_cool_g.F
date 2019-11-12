@@ -831,13 +831,13 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
             do i = is+1, ie+1
                 if (itmask(i)) then
                    call dust_growth_and_destruction(in,jn,kn,i,j,k,
-     &                  d, dust, tgas,
+     &                  d, dust, metal, tgas,
      &                  met1, met2, met3, met4, met5, met6,
      &                  met7, met8, met9, met10, met11,
      &                  dmet1, dmet2, dmet3, dmet4, dmet5, dmet6,
      &                  dmet7, dmet8, dmet9, dmet10, dmet11,
      &                  sne, tau_dest, tau_sput,
-     &                  SolarAbd, utim, urho, uxyz, dt,
+     &                  SolarAbd, utim, urho, uxyz, aye, dt,
      &                  metpt, dmetpt)
                 endif
             enddo

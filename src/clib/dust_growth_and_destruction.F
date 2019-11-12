@@ -21,7 +21,6 @@
      &       SolarAbundances(NUM_METAL_SPECIES),
      &       time_units, dens_units, len_units, aye, dtime
       R_PREC Density(in,jn,kn), Tgas(in,jn,kn),
-     &       dust_Density(in,jn,kn),
      &       Metallicity1(in,jn,kn), Metallicity2(in,jn,kn),
      &       Metallicity3(in,jn,kn), Metallicity4(in,jn,kn),
      &       Metallicity5(in,jn,kn), Metallicity6(in,jn,kn),
@@ -88,7 +87,7 @@
 !   main routine for dust growth and destruction
 !////////////////////////////////////////////////////////////
       subroutine dust_growth_and_destruction(in, jn, kn, i, j, k,
-     &     Density, dust_Density, Tgas,
+     &     Density, dust_Density, metal_Density, Tgas,
      &     Metallicity1, Metallicity2, Metallicity3,
      &     Metallicity4, Metallicity5, Metallicity6,
      &     Metallicity7, Metallicity8, Metallicity9,
@@ -100,14 +99,14 @@
      &     SNe_ThisTimeStep,
      &     tau_dest, tau_sput,
      &     SolarAbundances,
-     &     time_units, dens_units, len_units, dtime, metpt, dmetpt)
+     &     time_units, dens_units, len_units, aye, dtime, metpt, dmetpt)
       implicit NONE
 #include "grackle_fortran_types.def"
 !   arguments
       integer in, jn, kn, i, j, k
       real*8 tau_dest(in), tau_sput(in),
      &       SolarAbundances(NUM_METAL_SPECIES), 
-     &       time_units, dens_units, len_units, dtime
+     &       time_units, dens_units, len_units, aye, dtime
       R_PREC Density(in,jn,kn), Tgas(in,jn,kn),
      &       Metallicity1(in,jn,kn), Metallicity2(in,jn,kn),
      &       Metallicity3(in,jn,kn), Metallicity4(in,jn,kn),
@@ -121,7 +120,7 @@
      &       dust_Metallicity7(in,jn,kn), dust_Metallicity8(in,jn,kn),
      &       dust_Metallicity9(in,jn,kn), dust_Metallicity10(in,jn,kn),
      &       dust_Metallicity11(in,jn,kn),
-     &       dust_Density(in,jn,kn),
+     &       metal_Density(in,jn,kn), dust_Density(in,jn,kn),
      &       SNe_ThisTimeStep(in,jn,kn),
      &       metpt(NUM_METAL_SPECIES), dmetpt(NUM_METAL_SPECIES)
 
@@ -164,7 +163,7 @@
       tau_ref = DUST_GROWTH_TAUREF * 1e9 * SEC_PER_YEAR / time_units
 
       do n=0+1,NUM_METAL_SPECIES 
-          Mdust(n) = dmetpt(n) * dust_Density(i,j,k)
+          Mdust(n) = dmetpt(n) * Density(i,j,k)
           dM(n) = 0.
       enddo
 
@@ -201,10 +200,11 @@
 
 !   recalculate metallicity
       dust_Density(i,j,k) = dust_Density(i,j,k) + dM(1)
+      metal_Density(i,j,k) = metal_Density(i,j,k) - dM(1)
       do n=0+1,NUM_METAL_SPECIES
-          if (dust_Density(i,j,k) .lt. 0.0) then 
+          if (dust_Density(i,j,k) .gt. 0.0) then
               dmetpt(n) =  (dM(n) + Mdust(n))
-     &        / dust_Density(i,j,k)  ! SNe shocks on neighbors are ignored
+     &        / Density(i,j,k)  ! SNe shocks on neighbors are ignored
           else
               dmetpt(n) = 0.0
           endif
