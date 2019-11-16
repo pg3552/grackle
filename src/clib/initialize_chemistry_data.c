@@ -507,8 +507,6 @@ void show_parameters(FILE *fp, chemistry_data *my_chemistry)
 		  my_chemistry->SolarAbundances[8]);
   fprintf(fp, "SolarAbundances[9]                = %g\n",
 		  my_chemistry->SolarAbundances[9]);
-  fprintf(fp, "SolarAbundances[10]               = %g\n",
-		  my_chemistry->SolarAbundances[10]);
 # ifdef _OPENMP
   fprintf(fp, "omp_nthreads                      = %d\n",
           my_chemistry->omp_nthreads);

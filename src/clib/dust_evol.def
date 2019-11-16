@@ -1,4 +1,4 @@
-#define NUM_METAL_SPECIES 11
+#define NUM_METAL_SPECIES 10
 
 #ifdef CONFIG_BFLOAT_4
 

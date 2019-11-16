@@ -47,9 +47,9 @@
      &                iVheat, iMheat, Vheat, Mheat,
      &                iDustEvol, SolarAbd,
      &                met1, met2, met3, met4, met5, met6,
-     &                met7, met8, met9, met10, met11,
+     &                met7, met8, met9, met10,
      &                dmet1, dmet2, dmet3, dmet4, dmet5, dmet6,
-     &                dmet7, dmet8, dmet9, dmet10, dmet11, sne)
+     &                dmet7, dmet8, dmet9, dmet10, sne)
 
 !
 !  SOLVE MULTI-SPECIES RATE EQUATIONS AND RADIATIVE COOLING
@@ -208,8 +208,8 @@
      &        dmet4(in,jn,kn), dmet5(in,jn,kn), dmet6(in,jn,kn),
      &        dmet7(in,jn,kn), dmet8(in,jn,kn), dmet9(in,jn,kn),
      &        dmet10(in,jn,kn), dmet11(in,jn,kn),
-     &        metpt(NUM_METAL_SPECIES),
-     &        dmetpt(NUM_METAL_SPECIES)
+     &        metpt(NUM_METAL_SPECIES+1),
+     &        dmetpt(NUM_METAL_SPECIES+1)
 
 !  Cooling tables (coolings rates as a function of temperature)
 
@@ -600,10 +600,11 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 !              compute minimum rate timestep
                if (iDustEvol .eq. 1) then
                    call dust_tau_for_timestep(in, jn, kn, i, j, k,
-     &                 d, tgas, met1, met2, met3, met4, met5, met6,
-     &                 met7, met8, met9, met10, met11, sne,
+     &                 d, tgas, metal,
+     &                 met1, met2, met3, met4, met5, met6,
+     &                 met7, met8, met9, met10, sne,
      &                 tau_accr, tau_dest, tau_sput,
-     &                 SolarAbd, utim, urho, uxyz, aye, dt)
+     &                 z_solar, SolarAbd, utim, urho, uxyz, aye, dt)
                else
                    tau_accr(i) = huge8
                    tau_dest(i) = huge8
@@ -833,11 +834,11 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
                    call dust_growth_and_destruction(in,jn,kn,i,j,k,
      &                  dust, metal, tgas,
      &                  met1, met2, met3, met4, met5, met6,
-     &                  met7, met8, met9, met10, met11,
+     &                  met7, met8, met9, met10,
      &                  dmet1, dmet2, dmet3, dmet4, dmet5, dmet6,
-     &                  dmet7, dmet8, dmet9, dmet10, dmet11,
+     &                  dmet7, dmet8, dmet9, dmet10,
      &                  sne, tau_dest, tau_sput,
-     &                  SolarAbd, utim, urho, uxyz, aye, dt,
+     &                  z_solar, SolarAbd, utim, urho, uxyz, aye, dt,
      &                  metpt, dmetpt)
                 endif
             enddo

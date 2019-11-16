@@ -86,11 +86,11 @@ extern void FORTRAN_NAME(solve_rate_cool_g)(
         gr_float *met1, gr_float *met2, gr_float *met3,
         gr_float *met4, gr_float *met5, gr_float *met6,
         gr_float *met7, gr_float *met8, gr_float *met9,
-        gr_float *met10, gr_float *met11,
+        gr_float *met10,
         gr_float *dmet1, gr_float *dmet2, gr_float *dmet3,
         gr_float *dmet4, gr_float *dmet5, gr_float *dmet6,
         gr_float *dmet7, gr_float *dmet8, gr_float *dmet9,
-        gr_float *dmet10, gr_float *dmet11,
+        gr_float *dmet10,
         gr_float *sne);
 
 int local_solve_chemistry(chemistry_data *my_chemistry,
@@ -378,7 +378,6 @@ int local_solve_chemistry(chemistry_data *my_chemistry,
     my_fields->gas_metal_densities[7],
     my_fields->gas_metal_densities[8],
     my_fields->gas_metal_densities[9],
-    my_fields->gas_metal_densities[10],
     my_fields->dust_metal_densities[0],
     my_fields->dust_metal_densities[1],
     my_fields->dust_metal_densities[2],
@@ -389,7 +388,6 @@ int local_solve_chemistry(chemistry_data *my_chemistry,
     my_fields->dust_metal_densities[7],
     my_fields->dust_metal_densities[8],
     my_fields->dust_metal_densities[9],
-    my_fields->dust_metal_densities[10],
     my_fields->SNe_ThisTimeStep);
 
   return SUCCESS;

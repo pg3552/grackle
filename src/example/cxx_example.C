@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
   grackle_data->use_dust_evol = 1;
   // These two should be consistent.
-  grackle_data->SolarMetalFractionByMass = grackle_data->SolarAbundances[0];
+  grackle_data->SolarMetalFractionByMass = 0.0134;
 
   // Finally, initialize the chemistry object.
   if (initialize_chemistry_data(&my_units) == 0) {
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
   my_fields.SNe_ThisTimeStep = new gr_float[field_size];
 
-  for (int f = 0;f < 11;f++) {
+  for (int f = 0;f < 10;f++) {
     my_fields.gas_metal_densities[f] = new gr_float[field_size];
     my_fields.dust_metal_densities[f] = new gr_float[field_size];
   }
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     // SFR = 1 Msun/yr
     my_fields.SNe_ThisTimeStep[i] = 1.0 * 0.01067 * dt * my_units.time_units / pow(my_units.length_units, 3);
 
-    for (int f = 0;f < 11;f++) {
+    for (int f = 0;f < 10;f++) {
       my_fields.gas_metal_densities[f][i] = my_fields.density[i] *
         gas_metallicity * grackle_data->SolarAbundances[f];
       my_fields.dust_metal_densities[f][i] = my_fields.gas_metal_densities[f][i] *
@@ -206,11 +206,19 @@ int main(int argc, char *argv[])
   fprintf(stderr, "BEFORE: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  for (int f = 0;f < 11;f++) {
+  fprintf(stderr, "BEFORE: %g, %g\n",
+          (my_fields.metal_density[0] / my_fields.density[0]),
+          (my_fields.dust_density[0]  / my_fields.density[0]));
+  gr_float gmtot, dmtot;
+  gmtot = dmtot = 0;
+  for (int f = 0;f < 10;f++) {
     fprintf(stderr, "BEFORE: %g, %g\n",
             (my_fields.gas_metal_densities[f][0] / my_fields.density[0]),
             (my_fields.dust_metal_densities[f][0] / my_fields.density[0]));
+    gmtot += my_fields.gas_metal_densities[f][0];
+    dmtot += my_fields.dust_metal_densities[f][0];
   }
+  fprintf(stderr, "BEFORE TOTALS: %g, %g, %g\n", gmtot, dmtot, (gmtot+dmtot));
 
   /*********************************************************************
   / Calling the chemistry solver
@@ -286,11 +294,18 @@ int main(int argc, char *argv[])
   fprintf(stderr, "AFTER: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  for (int f = 0;f < 11;f++) {
+  fprintf(stderr, "AFTER: %g, %g\n",
+          (my_fields.metal_density[0] / my_fields.density[0]),
+          (my_fields.dust_density[0]  / my_fields.density[0]));
+  gmtot = dmtot = 0;
+  for (int f = 0;f < 10;f++) {
     fprintf(stderr, "AFTER: %g, %g\n",
             (my_fields.gas_metal_densities[f][0] / my_fields.density[0]),
             (my_fields.dust_metal_densities[f][0] / my_fields.density[0]));
+    gmtot += my_fields.gas_metal_densities[f][0];
+    dmtot += my_fields.dust_metal_densities[f][0];
   }
+  fprintf(stderr, "AFTER TOTALS: %g, %g, %g\n", gmtot, dmtot, (gmtot+dmtot));
 
   _free_chemistry_data(my_grackle_data, &grackle_rates);
 

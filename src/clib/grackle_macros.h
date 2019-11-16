@@ -114,6 +114,6 @@
 #define SIN(X) sin((double) (X))
 
 /* Dust evolution definitions */
-#define NUM_METAL_SPECIES 11
+#define NUM_METAL_SPECIES 10
 
 #endif

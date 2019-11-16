@@ -135,7 +135,7 @@ typedef struct
 
   /* flag and parameters for Li+ 2019 dust growth and destruction */
   int use_dust_evol;
-  double SolarAbundances[11];
+  double SolarAbundances[10];
 
   /* number of OpenMP threads, if supported */
 # ifdef _OPENMP
