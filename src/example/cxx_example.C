@@ -206,9 +206,11 @@ int main(int argc, char *argv[])
   fprintf(stderr, "BEFORE: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  fprintf(stderr, "BEFORE: %g, %g\n",
-          (my_fields.gas_metal_densities[0][0] / my_fields.density[0]),
-          (my_fields.dust_metal_densities[0][0] / my_fields.density[0]));
+  for (int f = 0;f < 11;f++) {
+    fprintf(stderr, "BEFORE: %g, %g\n",
+            (my_fields.gas_metal_densities[f][0] / my_fields.density[0]),
+            (my_fields.dust_metal_densities[f][0] / my_fields.density[0]));
+  }
 
   /*********************************************************************
   / Calling the chemistry solver
@@ -284,9 +286,11 @@ int main(int argc, char *argv[])
   fprintf(stderr, "AFTER: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  fprintf(stderr, "AFTER: %g, %g\n",
-          (my_fields.gas_metal_densities[0][0] / my_fields.density[0]),
-          (my_fields.dust_metal_densities[0][0] / my_fields.density[0]));
+  for (int f = 0;f < 11;f++) {
+    fprintf(stderr, "AFTER: %g, %g\n",
+            (my_fields.gas_metal_densities[f][0] / my_fields.density[0]),
+            (my_fields.dust_metal_densities[f][0] / my_fields.density[0]));
+  }
 
   _free_chemistry_data(my_grackle_data, &grackle_rates);
 
