@@ -70,9 +70,9 @@ typedef struct
   gr_float *H2_self_shielding_length;
 
   // densities of individual metal species in gas phase
-  gr_float *gas_metal_densities[10];
+  gr_float *gas_metal_densities[NUM_METAL_SPECIES];
   // densities of individual metal species in dust grains
-  gr_float *dust_metal_densities[10];
+  gr_float *dust_metal_densities[NUM_METAL_SPECIES];
   gr_float *SNe_ThisTimeStep;
 
 } grackle_field_data;
