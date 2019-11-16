@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
   int i;
   for (i = 0;i < field_size;i++) {
-    my_fields.density[i] = 1.0;
+    my_fields.density[i] = 1.67e-24 / my_units.density_units;
     my_fields.HI_density[i] = grackle_data->HydrogenFractionByMass *
       my_fields.density[i];
     my_fields.HII_density[i] = tiny_number * my_fields.density[i];
@@ -196,7 +196,8 @@ int main(int argc, char *argv[])
     my_fields.SNe_ThisTimeStep[i] = 1.0 * 0.01067 * dt * my_units.time_units / pow(my_units.length_units, 3);
 
     for (int f = 0;f < 11;f++) {
-      my_fields.Metallicity[f][i] = gas_metallicity * grackle_data->SolarAbundances[f];
+      my_fields.Metallicity[f][i] = my_fields.density[i] *
+        gas_metallicity * grackle_data->SolarAbundances[f];
       my_fields.dust_Metallicity[f][i] = my_fields.Metallicity[f][i] *
         grackle_data->local_dust_to_gas_ratio / grackle_data->SolarMetalFractionByMass;
     }
@@ -205,8 +206,9 @@ int main(int argc, char *argv[])
   fprintf(stderr, "BEFORE: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  fprintf(stderr, "BEFORE: %g, %g\n", my_fields.Metallicity[0][0],
-          my_fields.dust_Metallicity[0][0]);
+  fprintf(stderr, "BEFORE: %g, %g\n",
+          (my_fields.Metallicity[0][0] / my_fields.density[0]),
+          (my_fields.dust_Metallicity[0][0] / my_fields.density[0]));
 
   /*********************************************************************
   / Calling the chemistry solver
@@ -282,8 +284,9 @@ int main(int argc, char *argv[])
   fprintf(stderr, "AFTER: %g, %g\n",
           (my_fields.metal_density[0] / my_fields.density[0]),
           (my_fields.dust_density[0]  / my_fields.density[0]));
-  fprintf(stderr, "AFTER: %g, %g\n", my_fields.Metallicity[0][0],
-          my_fields.dust_Metallicity[0][0]);
+  fprintf(stderr, "AFTER: %g, %g\n",
+          (my_fields.Metallicity[0][0] / my_fields.density[0]),
+          (my_fields.dust_Metallicity[0][0] / my_fields.density[0]));
 
   _free_chemistry_data(my_grackle_data, &grackle_rates);
 
