@@ -113,7 +113,4 @@
 #define COS(X) cos((double) (X))
 #define SIN(X) sin((double) (X))
 
-/* Dust evolution definitions */
-#define NUM_METAL_SPECIES 10
-
 #endif

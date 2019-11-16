@@ -27,6 +27,9 @@
 #define gr_float double
 #endif
 
+/* Dust evolution definitions */
+#define NUM_METAL_SPECIES 10
+
 typedef struct
 {
 
