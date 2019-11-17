@@ -364,6 +364,10 @@ c      chunit = (7.17775e-12_DKIND)/(2._DKIND*uvel*uvel*mh)   ! 4.5 eV per H2 fo
 
          call scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                  HM, H2I, H2II, DI, DII, HDI, metal, dust,
+     &                  met1, met2, met3, met4, met5,
+     &                  met6, met7, met8, met9, met10,
+     &                  dmet1, dmet2, dmet3, dmet4, dmet5,
+     &                  dmet6, dmet7, dmet8, dmet9, dmet10,
      &                  is, ie, js, je, ks, ke,
      &                  in, jn, kn, ispecies, imetal, iDustEvol,
      &                  ifdust, aye**(-3))
@@ -909,6 +913,10 @@ c            WARNING_MESSAGE
 
          call scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                  HM, H2I, H2II, DI, DII, HDI, metal, dust,
+     &                  met1, met2, met3, met4, met5,
+     &                  met6, met7, met8, met9, met10,
+     &                  dmet1, dmet2, dmet3, dmet4, dmet5,
+     &                  dmet6, dmet7, dmet8, dmet9, dmet10,
      &                  is, ie, js, je, ks, ke,
      &                  in, jn, kn, ispecies, imetal, iDustEvol,
      &                  ifdust, aye**3)
@@ -935,6 +943,10 @@ c -----------------------------------------------------------
 
       subroutine scale_fields_g(d, de, sne, HI, HII, HeI, HeII, HeIII,
      &                        HM, H2I, H2II, DI, DII, HDI, metal, dust,
+     &                        met1, met2, met3, met4, met5,
+     &                        met6, met7, met8, met9, met10,
+     &                        dmet1, dmet2, dmet3, dmet4, dmet5,
+     &                        dmet6, dmet7, dmet8, dmet9, dmet10,
      &                        is, ie, js, je, ks, ke,
      &                        in, jn, kn, ispecies, imetal, iDustEvol,
      &                        ifdust, factor)
@@ -951,7 +963,15 @@ c -------------------------------------------------------------------
      &        HeI(in,jn,kn), HeII(in,jn,kn), HeIII(in,jn,kn),
      &        HM(in,jn,kn),  H2I(in,jn,kn), H2II(in,jn,kn),
      &        DI(in,jn,kn),  DII(in,jn,kn), HDI(in,jn,kn),
-     &        d(in,jn,kn),   metal(in,jn,kn), dust(in,jn,kn)
+     &        d(in,jn,kn),   metal(in,jn,kn), dust(in,jn,kn),
+     &        met1(in,jn,kn), met2(in,jn,kn), met3(in,jn,kn),
+     &        met4(in,jn,kn), met5(in,jn,kn), met6(in,jn,kn),
+     &        met7(in,jn,kn), met8(in,jn,kn), met9(in,jn,kn),
+     &        met10(in,jn,kn),
+     &        dmet1(in,jn,kn), dmet2(in,jn,kn), dmet3(in,jn,kn),
+     &        dmet4(in,jn,kn), dmet5(in,jn,kn), dmet6(in,jn,kn),
+     &        dmet7(in,jn,kn), dmet8(in,jn,kn), dmet9(in,jn,kn),
+     &        dmet10(in,jn,kn)
       real*8 factor
 
 !     locals
@@ -1017,7 +1037,27 @@ c -------------------------------------------------------------------
          do k = ks+1, ke+1
             do j = js+1, je+1
                do i = is+1, ie+1
-                  sne(i,j,k) = sne(i,j,k)*factor
+                  sne(i,j,k)    = sne(i,j,k)*factor
+                  met1(i,j,k)   = met1(i,j,k)*factor
+                  met2(i,j,k)   = met2(i,j,k)*factor
+                  met3(i,j,k)   = met3(i,j,k)*factor
+                  met4(i,j,k)   = met4(i,j,k)*factor
+                  met5(i,j,k)   = met5(i,j,k)*factor
+                  met6(i,j,k)   = met6(i,j,k)*factor
+                  met7(i,j,k)   = met7(i,j,k)*factor
+                  met8(i,j,k)   = met8(i,j,k)*factor
+                  met9(i,j,k)   = met9(i,j,k)*factor
+                  met10(i,j,k)  = met10(i,j,k)*factor
+                  dmet1(i,j,k)  = dmet1(i,j,k)*factor
+                  dmet2(i,j,k)  = dmet2(i,j,k)*factor
+                  dmet3(i,j,k)  = dmet3(i,j,k)*factor
+                  dmet4(i,j,k)  = dmet4(i,j,k)*factor
+                  dmet5(i,j,k)  = dmet5(i,j,k)*factor
+                  dmet6(i,j,k)  = dmet6(i,j,k)*factor
+                  dmet7(i,j,k)  = dmet7(i,j,k)*factor
+                  dmet8(i,j,k)  = dmet8(i,j,k)*factor
+                  dmet9(i,j,k)  = dmet9(i,j,k)*factor
+                  dmet10(i,j,k) = dmet10(i,j,k)*factor
                enddo
             enddo
          enddo
