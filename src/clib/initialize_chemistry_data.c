@@ -487,28 +487,11 @@ void show_parameters(FILE *fp, chemistry_data *my_chemistry)
           my_chemistry->H2_self_shielding);
   fprintf(fp, "use_dust_evol                     = %d\n",
 		  my_chemistry->use_dust_evol);
-  fprintf(fp, "SolarAbundances[0]                = %g\n",
-		  my_chemistry->SolarAbundances[0]);
-  fprintf(fp, "SolarAbundances[1]                = %g\n",
-		  my_chemistry->SolarAbundances[1]);
-  fprintf(fp, "SolarAbundances[2]                = %g\n",
-		  my_chemistry->SolarAbundances[2]);
-  fprintf(fp, "SolarAbundances[3]                = %g\n",
-		  my_chemistry->SolarAbundances[3]);
-  fprintf(fp, "SolarAbundances[4]                = %g\n",
-		  my_chemistry->SolarAbundances[4]);
-  fprintf(fp, "SolarAbundances[5]                = %g\n",
-		  my_chemistry->SolarAbundances[5]);
-  fprintf(fp, "SolarAbundances[6]                = %g\n",
-		  my_chemistry->SolarAbundances[6]);
-  fprintf(fp, "SolarAbundances[7]                = %g\n",
-		  my_chemistry->SolarAbundances[7]);
-  fprintf(fp, "SolarAbundances[8]                = %g\n",
-		  my_chemistry->SolarAbundances[8]);
-  fprintf(fp, "SolarAbundances[9]                = %g\n",
-		  my_chemistry->SolarAbundances[9]);
-  fprintf(fp, "SolarAbundances[10]               = %g\n",
-		  my_chemistry->SolarAbundances[10]);
+  int f;
+  for (f = 0; f < NUM_METAL_SPECIES; f++) {
+    fprintf(fp, "SolarAbundances[%d]                = %g\n",
+            f, my_chemistry->SolarAbundances[f]);
+  }
 # ifdef _OPENMP
   fprintf(fp, "omp_nthreads                      = %d\n",
           my_chemistry->omp_nthreads);
